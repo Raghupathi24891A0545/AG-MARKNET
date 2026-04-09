@@ -3,8 +3,8 @@
 // GPS-first coordinate-based calls to production Flask backend
 // ============================================================
 
-const API_BASE = 'http://127.0.0.1:5000';
-const DISEASE_API_BASE = 'http://127.0.0.1:5001';
+const API_BASE = 'https://agri-connect-main-app.onrender.com';
+const DISEASE_API_BASE = 'https://agri-connect-image.onrender.com';
 
 // Retry-aware fetch with timeout
 async function apiFetch(endpoint, options = {}, retries = 2) {
