@@ -236,23 +236,23 @@ export function renderAnalysis() {
                 </select>
               </div>
               <div class="form-group">
-                <label>pH Level <span class="hint">4.0–9.0</span></label>
+                <label>pH Level <span style="color:#ef4444;">*</span> <span class="hint">4.0–9.0</span></label>
                 <input type="number" class="form-input" id="w-ph" min="4.0" max="9.0" step="0.1" placeholder="6.5" />
               </div>
               <div class="form-group">
-                <label>Nitrogen (N) <span class="hint">0–140 kg/ha scale</span></label>
+                <label>Nitrogen (N) <span style="color:#ef4444;">*</span> <span class="hint">0–140 kg/ha scale</span></label>
                 <input type="number" class="form-input" id="w-n" min="0" max="140" placeholder="50" />
               </div>
               <div class="form-group">
-                <label>Phosphorus (P) <span class="hint">0–145 kg/ha scale</span></label>
+                <label>Phosphorus (P) <span style="color:#ef4444;">*</span> <span class="hint">0–145 kg/ha scale</span></label>
                 <input type="number" class="form-input" id="w-p" min="0" max="145" placeholder="40" />
               </div>
               <div class="form-group">
-                <label>Potassium (K) <span class="hint">0–205 kg/ha scale</span></label>
+                <label>Potassium (K) <span style="color:#ef4444;">*</span> <span class="hint">0–205 kg/ha scale</span></label>
                 <input type="number" class="form-input" id="w-k" min="0" max="205" placeholder="30" />
               </div>
               <div class="form-group">
-                <label>Soil Moisture <span class="hint">20–80%</span></label>
+                <label>Soil Moisture <span style="color:#ef4444;">*</span> <span class="hint">20–80%</span></label>
                 <input type="number" class="form-input" id="w-moisture" min="0" max="100" placeholder="40" />
               </div>
               <div class="form-group">
@@ -269,7 +269,7 @@ export function renderAnalysis() {
 
             <div style="margin-top:var(--sp-md);padding:var(--sp-md);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:var(--r-md);">
               <div style="font-size:0.8rem;color:var(--c-accent);">
-                💡 For precise NPK values, get a soil report from your nearest Krishi Vigyan Kendra (KVK) and enter the values above.
+                💡 Fields marked with <span style="color:#ef4444;font-weight:700;">*</span> are mandatory. Use "Fetch Soil Data" above OR enter values manually from your local KVK soil report.
               </div>
             </div>
 
@@ -467,15 +467,46 @@ function goToStep(step) {
 async function submitAnalysis() {
   // Collect soil data from form
   const soilType = document.getElementById('w-soil-type')?.value;
-  const ph = parseFloat(document.getElementById('w-ph')?.value) || null;
-  const N = parseFloat(document.getElementById('w-n')?.value) || null;
-  const P = parseFloat(document.getElementById('w-p')?.value) || null;
-  const K = parseFloat(document.getElementById('w-k')?.value) || null;
-  const moisture = parseFloat(document.getElementById('w-moisture')?.value) || null;
-  const oc = parseFloat(document.getElementById('w-oc')?.value) || null;
-  const rainfall = parseFloat(document.getElementById('w-rainfall')?.value) || 0;
+  const phVal = document.getElementById('w-ph')?.value;
+  const nVal = document.getElementById('w-n')?.value;
+  const pVal = document.getElementById('w-p')?.value;
+  const kVal = document.getElementById('w-k')?.value;
+  const moistureVal = document.getElementById('w-moisture')?.value;
+  const ocVal = document.getElementById('w-oc')?.value;
+  const rainfallVal = document.getElementById('w-rainfall')?.value;
 
-  // Build payload
+  // Validate mandatory soil fields
+  const missingFields = [];
+  if (!phVal || phVal.trim() === '') missingFields.push('pH Level');
+  if (!nVal || nVal.trim() === '') missingFields.push('Nitrogen (N)');
+  if (!pVal || pVal.trim() === '') missingFields.push('Phosphorus (P)');
+  if (!kVal || kVal.trim() === '') missingFields.push('Potassium (K)');
+  if (!moistureVal || moistureVal.trim() === '') missingFields.push('Soil Moisture');
+
+  if (missingFields.length > 0) {
+    showToast(`⚠️ Please fill these required fields: ${missingFields.join(', ')}`, 'error');
+    // Highlight empty fields
+    const fieldMap = { 'pH Level': 'w-ph', 'Nitrogen (N)': 'w-n', 'Phosphorus (P)': 'w-p', 'Potassium (K)': 'w-k', 'Soil Moisture': 'w-moisture' };
+    missingFields.forEach(f => {
+      const el = document.getElementById(fieldMap[f]);
+      if (el) {
+        el.style.borderColor = '#ef4444';
+        el.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.2)';
+        el.addEventListener('input', () => { el.style.borderColor = ''; el.style.boxShadow = ''; }, { once: true });
+      }
+    });
+    return;
+  }
+
+  const ph = parseFloat(phVal);
+  const N = parseFloat(nVal);
+  const P = parseFloat(pVal);
+  const K = parseFloat(kVal);
+  const moisture = parseFloat(moistureVal);
+  const oc = parseFloat(ocVal) || 50;
+  const rainfall = parseFloat(rainfallVal) || 600;
+
+  // Build payload — always include soil data
   const payload = {
     latitude: farmData.lat,
     longitude: farmData.lon,
@@ -489,13 +520,15 @@ async function submitAnalysis() {
     yield_last: farmData.yield_last || 4000,
     farmer_name: farmData.farmer_name || '',
     annual_rainfall_mm: farmData.annual_rainfall_mm || rainfall || 0,
+    // Always send soil values
+    N: N,
+    P: P,
+    K: K,
+    ph: ph,
+    soil_type: soilType || 'Loamy',
+    soil_moisture: moisture,
+    organic_carbon: oc,
   };
-
-  // Add soil overrides if user has values
-  if (N !== null) { payload.N = N; payload.P = P || 40; payload.K = K || 30; payload.ph = ph || 6.5; }
-  if (soilType) payload.soil_type = soilType;
-  if (moisture !== null) payload.soil_moisture = moisture;
-  if (oc !== null) payload.organic_carbon = oc;
 
   goToStep(4);
 
