@@ -236,12 +236,31 @@ body::before {
 /* Page-specific background hero banners */
 .page-section::before {
   content: '';
-  position: absolute;
-  top: -68px; left: -50vw; right: -50vw;
-  height: 420px;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 100vh;
   background:
-    linear-gradient(180deg, rgba(10,15,13,0.5) 0%, rgba(10,15,13,0.9) 70%, var(--c-bg) 100%),
+    linear-gradient(180deg,
+      rgba(10,15,13,0.3) 0%,
+      rgba(10,15,13,0.55) 30%,
+      rgba(10,15,13,0.8) 55%,
+      rgba(10,15,13,0.95) 80%,
+      var(--c-bg) 100%
+    ),
     url('https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=1920&q=75') center/cover no-repeat;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Ambient glow below hero */
+.page-section::after {
+  content: '';
+  position: fixed;
+  top: 50vh; left: 0; right: 0;
+  height: 50vh;
+  background:
+    radial-gradient(ellipse at 30% 0%, rgba(22,163,74,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse at 70% 30%, rgba(34,197,94,0.04) 0%, transparent 60%);
   z-index: -1;
   pointer-events: none;
 }
