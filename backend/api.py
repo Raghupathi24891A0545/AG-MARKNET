@@ -518,6 +518,17 @@ def farm_analyze():
         # Loosen season constraint if nothing matches
         feasible = get_feasible_crops(temperature, humidity, ph, rainfall, N, P, K, region, None)
 
+    if not feasible:
+        # Extreme fallback: just return ALL crops to guarantee we display recommendations
+        # regardless of explicitly invalid or extreme soil data inputs.
+        feasible = []
+        for crop_name, profile in CROP_PROFILES.items():
+            feasible.append({
+                "crop": crop_name,
+                "profile": profile,
+                "region_match": True if not region else (region in profile.get("regions", []))
+            })
+
     # Step B: AI ranking (from ML model)
     try:
         ml_result = predict_crop(
