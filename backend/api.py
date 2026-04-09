@@ -620,11 +620,37 @@ def farm_analyze():
             fertilizer_usage=previous_fertilizer,
             yield_last=yield_last,
         )
+        if "error" in fert_result:
+            raise Exception(fert_result["error"])
         best_fert = fert_result.get("best_fertilizer", {})
         fert_name = best_fert.get("fertilizer", "NPK")
     except Exception:
-        best_fert = {"fertilizer": "NPK", "confidence": 50.0}
-        fert_name = "NPK"
+        # Rule-based fallback using soil data explicitly
+        n_def = N < 35
+        p_def = P < 25
+        k_def = K < 25
+        if n_def and not p_def and not k_def:
+            fert_name = "Urea"
+        elif p_def and not n_def and not k_def:
+            fert_name = "SSP"
+        elif k_def and not n_def and not p_def:
+            fert_name = "MOP"
+        elif n_def and p_def and not k_def:
+            fert_name = "DAP"
+        elif n_def and p_def and k_def:
+            fert_name = "NPK"
+        else:
+            fert_name = "Compost"
+            
+        from config import FERTILIZER_INFO
+        best_fert = {
+            "fertilizer": fert_name, 
+            "confidence": 75.0,
+            "details": FERTILIZER_INFO.get(fert_name, {
+                "npk": "N/A", "qty_per_ha": 50, "cost_per_kg": 20
+            })
+        }
+        fert_name = best_fert.get("fertilizer", "NPK")
 
     # Stage-wise guide
     stage_guide = FERTILIZER_STAGE_GUIDE.get(best_crop_name, FERTILIZER_STAGE_GUIDE.get("rice", []))
