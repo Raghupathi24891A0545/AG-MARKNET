@@ -28,7 +28,7 @@ async function apiFetch(endpoint, options = {}, retries = 2) {
       }
       if (attempt === retries) {
         if (err.message === 'Failed to fetch') {
-          throw new Error('Cannot connect to Agri-Connect server. Make sure the Flask backend is running on port 5000.');
+          throw new Error('Cannot connect to Agri-Connect server. The backend may be starting up — please try again in 30 seconds.');
         }
         throw err;
       }
@@ -124,7 +124,7 @@ export async function predictDisease(file, language = 'en') {
     return data;
   } catch (err) {
     if (err.message === 'Failed to fetch') {
-      throw new Error('Disease detection server not running. Start the image_detection server on port 5001.');
+      throw new Error('Disease detection server is starting up. Please try again in 30 seconds.');
     }
     throw err;
   }

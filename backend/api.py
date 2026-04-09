@@ -283,8 +283,7 @@ def get_feasible_crops(temperature, humidity, ph, rainfall, N, P, K, region, sea
 
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173",
-                   "http://localhost:3000", os.getenv('FRONTEND_URL', '')])
+CORS(app, origins="*")
 
 if USE_DB:
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')

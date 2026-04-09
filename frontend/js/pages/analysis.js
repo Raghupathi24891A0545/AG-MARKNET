@@ -520,8 +520,8 @@ async function submitAnalysis() {
         <h3 style="color:#f87171;margin-bottom:var(--sp-md);">Analysis Failed</h3>
         <p style="color:var(--c-text-secondary);">${err.message}</p>
         <div style="margin-top:var(--sp-md);font-size:0.8rem;color:var(--c-text-muted);">
-          Make sure the Flask backend is running on port 5000<br>
-          and your OpenWeatherMap API key is configured in backend/.env
+          The server may be waking up (free tier sleeps after inactivity).<br>
+          Please wait 30 seconds and try again.
         </div>
         <button class="btn btn-secondary" style="margin-top:var(--sp-xl);" onclick="window.dispatchEvent(new CustomEvent('navigate',{detail:'analysis'}))">
           ← Try Again
