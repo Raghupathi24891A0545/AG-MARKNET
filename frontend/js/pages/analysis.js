@@ -636,6 +636,7 @@ async function renderResults(result, payload) {
             <span class="crop-tag season">📅 ${seasonTr}</span>
             <span class="crop-tag water">💧 ${crop.water_need}</span>
             <span class="crop-tag duration">⏱️ ${crop.duration_days}d</span>
+            ${crop.in_dataset ? '<span class="crop-tag" style="background:rgba(22,163,74,0.1);color:#16a34a;border-color:rgba(22,163,74,0.3);">🤖 AI Trained</span>' : '<span class="crop-tag" style="background:rgba(156,163,175,0.1);color:#6b7280;border-color:rgba(156,163,175,0.3);">📖 Expert Fallback</span>'}
           </div>
           <div style="margin-top:var(--sp-md);display:flex;flex-direction:column;gap:4px;">
             <div class="metric-row">
@@ -828,7 +829,10 @@ async function renderResults(result, payload) {
           <div>
             <div class="metric-row">
               <span class="metric-label">Best Fertilizer</span>
-              <span class="metric-value highlight" style="font-size:1.1rem;">${fertName}</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="metric-value highlight" style="font-size:1.1rem;">${fertName}</span>
+                ${fert.in_dataset ? '<span style="font-size:0.65rem;padding:2px 6px;border-radius:12px;background:rgba(22,163,74,0.1);color:#16a34a;border:1px solid rgba(22,163,74,0.3);font-weight:600;">🤖 AI Trained</span>' : '<span style="font-size:0.65rem;padding:2px 6px;border-radius:12px;background:rgba(156,163,175,0.1);color:#6b7280;border:1px solid rgba(156,163,175,0.3);font-weight:600;">📖 Expert Fallback</span>'}
+              </div>
             </div>
             <div class="metric-row">
               <span class="metric-label">Confidence</span>
@@ -886,7 +890,10 @@ async function renderResults(result, payload) {
               ${allFeasible.map((crop, i) => `
                 <tr>
                   <td>${i + 1}</td>
-                  <td style="font-weight:600;text-transform:capitalize;" class="t-crop" data-crop="${crop.crop}">${crop.crop}</td>
+                  <td style="font-weight:600;text-transform:capitalize;" class="t-crop" data-crop="${crop.crop}">
+                    ${crop.crop}
+                    <div style="font-size:0.65rem;margin-top:2px;font-weight:normal;">${crop.in_dataset ? '<span style="color:#16a34a;">🤖 AI Trained</span>' : '<span style="color:#6b7280;">📖 Expert Fallback</span>'}</div>
+                  </td>
                   <td>
                     <div style="display:flex;align-items:center;gap:8px;">
                       <div class="progress-bar" style="width:60px;">

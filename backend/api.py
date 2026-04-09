@@ -581,6 +581,7 @@ def farm_analyze():
             "net_profit_estimated": net_profit,
             "region_match": fc["region_match"],
             "ml_confidence": round(ml_score, 2),
+            "in_dataset": crop.lower() in ['papaya', 'kidneybeans', 'coffee', 'mango', 'jute', 'maize', 'cotton', 'grapes', 'watermelon', 'rice', 'muskmelon', 'pigeonpeas', 'chickpea', 'blackgram', 'mungbean', 'banana', 'apple', 'coconut', 'mothbeans', 'pomegranate', 'orange', 'lentil']
         })
 
     scored.sort(key=lambda x: -x["suitability_score"])
@@ -653,6 +654,7 @@ def farm_analyze():
         "organic_alternatives": organic_alts,
         "warning": warning,
         "crop_context": best_crop_name,
+        "in_dataset": fert_name in ['Compost', 'SSP', 'Urea', 'MOP', 'DAP', 'NPK', 'Zinc Sulphate']
     }
 
     # 6. IRRIGATION GUIDANCE
