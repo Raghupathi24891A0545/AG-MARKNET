@@ -561,8 +561,37 @@ def farm_analyze():
             geo_bonus = 15
         if "vijayawada" in str(geo.get("district", "")).lower() and crop in ["banana", "rice"]:
             geo_bonus = 10
+
+        # Dynamic agronomic distance scoring
+        ideal_temp = (profile["min_temp"] + profile["max_temp"]) / 2
+        temp_dist = abs(temperature - ideal_temp)
+        temp_range = (profile["max_temp"] - profile["min_temp"]) / 2
+        temp_penalty = min(20, (temp_dist / max(1, temp_range)) * 10)
+
+        ideal_ph = (profile["min_ph"] + profile["max_ph"]) / 2
+        ph_dist = abs(ph - ideal_ph)
+        ph_range = (profile["max_ph"] - profile["min_ph"]) / 2
+        ph_penalty = min(20, (ph_dist / max(0.1, ph_range)) * 10)
+
+        min_rain = profile.get("min_rain", 0)
+        max_rain = profile.get("max_rain", 3000)
+        ideal_rain = (min_rain + max_rain) / 2
+        rain_dist = abs(rainfall - ideal_rain)
+        rain_range = max(1, (max_rain - min_rain) / 2)
+        rain_penalty = min(20, (rain_dist / rain_range) * 10)
+
+        n_req = profile.get("min_n", 0)
+        n_penalty = 0 if N >= n_req else min(20, ((n_req - N) / max(1, n_req)) * 20)
+
+        # Baseline optimal score is 85, minus penalties
+        base_score = 85 - temp_penalty - ph_penalty - rain_penalty - n_penalty
+
+        if ml_score > 0:
+            final_score = base_score * 0.3 + ml_score * 0.7 + region_bonus + geo_bonus
+        else:
+            final_score = base_score + region_bonus + geo_bonus
             
-        suitability = round(min(99, max(1, 50 + ml_score + region_bonus + geo_bonus)), 1)
+        suitability = round(min(99, max(1, final_score)), 1)
 
         # Price / profit info
         price_per_kg = CROP_PRICES.get(crop, 25)
