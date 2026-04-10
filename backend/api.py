@@ -602,11 +602,25 @@ def farm_analyze():
 
         reason_parts = []
         if temperature >= profile["min_temp"] and temperature <= profile["max_temp"]:
-            reason_parts.append(f"temperature ({temperature}°C) suits range {profile['min_temp']}–{profile['max_temp']}°C")
+            reason_parts.append(f"temperature ({temperature}°C) fits ideal range {profile['min_temp']}–{profile['max_temp']}°C")
         if ph >= profile["min_ph"] and ph <= profile["max_ph"]:
             reason_parts.append(f"soil pH {ph:.1f} within optimal {profile['min_ph']}–{profile['max_ph']}")
+        if rainfall >= profile["min_rain"]:
+            reason_parts.append(f"rainfall ({rainfall}mm) meets minimum {profile['min_rain']}mm")
+        if humidity >= 50 and humidity <= 85:
+            reason_parts.append(f"humidity ({humidity}%) favorable for growth")
+        if N >= profile.get("min_n", 0):
+            reason_parts.append(f"soil nitrogen ({N} kg/ha) adequate")
         if ml_score > 20:
-            reason_parts.append(f"AI model shows {ml_score:.0f}% pattern match")
+            reason_parts.append(f"trained model shows {ml_score:.0f}% pattern match with dataset")
+        if fc["region_match"]:
+            reason_parts.append(f"suited for {region} region farming")
+        
+        # Build a informative final reason
+        if reason_parts:
+            final_reason = "; ".join(reason_parts[:4])  # max 4 most relevant reasons
+        else:
+            final_reason = f"Passes basic agronomic filters for {season} season at {temperature}°C, pH {ph:.1f}"
 
         scored.append({
             "crop": crop,
@@ -616,7 +630,7 @@ def farm_analyze():
             "harvest_months": profile["harvest_months"],
             "duration_days": profile["duration_days"],
             "water_need": profile["water_need"],
-            "reason": "; ".join(reason_parts) if reason_parts else f"Suitable for current {season} conditions",
+            "reason": final_reason,
             "price_per_kg": price_per_kg,
             "net_profit_estimated": net_profit,
             "region_match": fc["region_match"],
@@ -697,20 +711,38 @@ def farm_analyze():
     organic_alts = ORGANIC_ALTERNATIVES.get(fert_name, ["Compost 5 tonnes/ha", "Vermicompost 3 tonnes/ha"])
     warning = DISEASE_WARNINGS.get(fert_name, "")
 
-    # Nutrient deficiency summary
+    # Nutrient deficiency summary — with specific dosages (not generic)
     deficiency = []
     if N < 30:
-        deficiency.append({"nutrient": "Nitrogen (N)", "level": "low", "remedy": "Apply Urea or DAP"})
+        deficiency.append({
+            "nutrient": "Nitrogen (N)", "level": "low",
+            "remedy": f"Apply Urea 100 kg/ha (46-0-0) in 2 split doses at 25 & 50 days after planting for {best_crop_name}. Or DAP 50 kg/ha at basal."
+        })
     elif N > 100:
-        deficiency.append({"nutrient": "Nitrogen (N)", "level": "excess", "remedy": "Reduce N application. Risk of lodging."})
+        deficiency.append({
+            "nutrient": "Nitrogen (N)", "level": "excess",
+            "remedy": "Reduce N application by 30%. Excess N causes lodging in cereals and delays maturity. Skip next scheduled Urea dose."
+        })
     if P < 20:
-        deficiency.append({"nutrient": "Phosphorus (P)", "level": "low", "remedy": "Apply DAP or SSP"})
+        deficiency.append({
+            "nutrient": "Phosphorus (P)", "level": "low",
+            "remedy": f"Apply DAP 50 kg/ha (18-46-0) or SSP 125 kg/ha (0-16-0) as basal dose before sowing {best_crop_name}. Add PSB biofertilizer for better uptake."
+        })
     if K < 15:
-        deficiency.append({"nutrient": "Potassium (K)", "level": "low", "remedy": "Apply MOP or SOP"})
+        deficiency.append({
+            "nutrient": "Potassium (K)", "level": "low",
+            "remedy": f"Apply MOP 40 kg/ha (0-0-60) — 50% as basal + 50% at flowering stage of {best_crop_name}. Use SOP for chloride-sensitive crops."
+        })
     if ph < 5.5:
-        deficiency.append({"nutrient": "Soil pH", "level": "acidic", "remedy": "Apply lime 2 tonnes/ha"})
+        deficiency.append({
+            "nutrient": "Soil pH", "level": "acidic",
+            "remedy": f"Apply agricultural lime (CaCO₃) 2-4 tonnes/ha based on pH {ph:.1f}. Incorporate 2 weeks before planting. Retest pH after 3 months."
+        })
     if ph > 8.0:
-        deficiency.append({"nutrient": "Soil pH", "level": "alkaline", "remedy": "Apply gypsum or sulfur"})
+        deficiency.append({
+            "nutrient": "Soil pH", "level": "alkaline",
+            "remedy": f"Apply gypsum (CaSO₄) 2 tonnes/ha or eleite sulfur 400 kg/ha to reduce pH from {ph:.1f}. Add organic matter (FYM 10 tonnes/ha) to buffer."
+        })
 
     response["fertilizer_recommendation"] = {
         "recommended_fertilizer": best_fert,

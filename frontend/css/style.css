@@ -1422,6 +1422,123 @@ body::before {
 .upload-text { color: var(--c-text-secondary); font-size: 0.9rem; }
 .upload-hint { color: var(--c-text-muted); font-size: 0.78rem; }
 
+/* ===== CROP DOCTOR — Mode Selector, Camera, Preview ===== */
+.crop-doctor-card {
+  overflow: hidden;
+}
+
+.cd-mode-selector {
+  display: flex;
+  gap: var(--sp-xs);
+  background: var(--c-surface);
+  border-radius: var(--r-lg);
+  padding: 4px;
+  border: 1px solid var(--c-border);
+  margin-bottom: var(--sp-xl);
+}
+
+.cd-mode-btn {
+  flex: 1;
+  padding: 11px 18px;
+  border-radius: var(--r-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: var(--t-fast);
+  white-space: nowrap;
+  font-family: var(--font-body);
+  text-align: center;
+}
+
+.cd-mode-btn:hover {
+  color: var(--c-text);
+  background: var(--c-surface-2);
+}
+
+.cd-mode-btn.active {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dark));
+  color: white;
+  box-shadow: 0 0 15px var(--c-primary-glow);
+}
+
+.cd-mode-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.2);
+}
+
+/* Camera */
+.cd-camera-container {
+  position: relative;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  background: #000;
+  min-height: 300px;
+}
+
+.cd-video {
+  width: 100%;
+  height: auto;
+  display: block;
+  min-height: 300px;
+  object-fit: cover;
+  border-radius: var(--r-xl);
+}
+
+.cd-camera-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.cd-camera-frame {
+  width: 65%;
+  aspect-ratio: 1;
+  max-width: 280px;
+  border: 2px solid rgba(34, 197, 94, 0.6);
+  border-radius: var(--r-xl);
+  box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.35);
+  animation: cameraPulse 2s ease infinite;
+}
+
+.cd-camera-hint {
+  margin-top: var(--sp-md);
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  font-weight: 600;
+}
+
+@keyframes cameraPulse {
+  0%, 100% { border-color: rgba(34, 197, 94, 0.6); }
+  50% { border-color: rgba(34, 197, 94, 0.25); }
+}
+
+/* Preview */
+.cd-leaf-preview {
+  width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--c-border);
+  background: #000;
+}
+
+/* Action Buttons */
+.cd-actions {
+  display: flex;
+  gap: var(--sp-md);
+  justify-content: center;
+  margin-top: var(--sp-lg);
+  flex-wrap: wrap;
+}
+
 /* ===== RESPONSIVE UTILITIES ===== */
 .hide-mobile { }
 .show-mobile { display: none; }
