@@ -4,6 +4,16 @@ import numpy as np
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+import gc
+
+# Memory optimizations for Render Free Tier (512MB RAM)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Reduce tf logging
+tf.config.threading.set_inter_op_parallelism_threads(1)
+tf.config.threading.set_intra_op_parallelism_threads(1)
+try:
+    tf.config.set_visible_devices([], 'GPU') # CPU only
+except:
+    pass
 
 app = Flask(__name__)
 CORS(app)
@@ -74,6 +84,11 @@ def predict_disease():
         for i, s in enumerate(predictions):
             scores.append({"name": TREATMENTS[CLASS_NAMES[i]][lang]["name"], "conf": round(float(s*100), 2)})
 
+        # Aggressively release memory for Render free tier
+        del img_array, img, predictions
+        tf.keras.backend.clear_session()
+        gc.collect()
+        
         os.remove(filepath)
         return jsonify({
             "status": "success",
