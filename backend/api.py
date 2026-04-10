@@ -14,7 +14,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-import google.generativeai as genai
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
 
 # ---- Conditional DB import (works without DB too) ----
 USE_DB = bool(os.getenv('DATABASE_URL'))
@@ -1138,8 +1141,8 @@ def chatbot():
     
     gemini_key = os.getenv("GEMINI_API_KEY")
     
-    # 1. Attempt Gemini AI Response first if key exists
-    if gemini_key:
+    # 1. Attempt Gemini AI Response first if key exists AND library is present
+    if gemini_key and genai is not None:
         try:
             genai.configure(api_key=gemini_key)
             model = genai.GenerativeModel('gemini-1.5-flash')
@@ -1161,6 +1164,8 @@ def chatbot():
             })
         except Exception as e:
             print(f"Gemini AI Error: {e}. Falling back to rules.")
+    elif gemini_key and genai is None:
+        print("Gemini API key is set, but 'google-generativeai' package is not installed. Falling back to rules.")
 
     # 2. Rule-Based Fallback
     responses_en = {
