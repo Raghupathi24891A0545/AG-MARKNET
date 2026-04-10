@@ -259,7 +259,13 @@ export function initCropDoctor() {
       showToast('No image selected', 'error');
       return;
     }
-    await analyzeImage(file);
+    // Compress file before upload to make it much faster
+    try {
+      const compressedFile = await compressImage(file, 800);
+      await analyzeImage(compressedFile);
+    } catch (e) {
+      await analyzeImage(file); // fallback to original
+    }
   });
 
   // ---- Camera: Capture ----
@@ -318,6 +324,23 @@ export function initCropDoctor() {
   function renderResult(data) {
     const card = document.getElementById('cd-result-card');
     if (!card || !data) return;
+
+    if (data.is_recognized === false) {
+      card.innerHTML = `
+        <div style="text-align:center;padding:var(--sp-2xl);background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:var(--r-xl);margin-bottom:var(--sp-xl);">
+          <div style="font-size:3.5rem;margin-bottom:var(--sp-md);">🤷</div>
+          <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:800;color:var(--c-text);margin-bottom:8px;">No Match Found</div>
+          <p style="color:var(--c-text-secondary);font-size:0.95rem;max-width:300px;margin:0 auto;">
+            The image was not recognized as a supported crop leaf (potato, etc.). Please ensure the photo clearly shows a single crop leaf in good lighting.
+          </p>
+        </div>
+        <div style="text-align:center;">
+          <button class="btn btn-secondary btn-lg" id="cd-scan-again">🔄 Try Again</button>
+        </div>
+      `;
+      document.getElementById('cd-scan-again')?.addEventListener('click', resetToUpload);
+      return;
+    }
 
     const isHealthy = data.is_healthy;
     const diag = data.diagnosis || {};
@@ -477,4 +500,42 @@ function stopCamera() {
   }
   const video = document.getElementById('cd-video');
   if (video) video.srcObject = null;
+}
+
+// Helper: compress image before upload so API is fast
+function compressImage(file, maxSize) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = event => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+        } else {
+          if (height > maxSize) { width *= maxSize / height; height = maxSize; }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(blob => {
+          if (blob) {
+            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+          } else {
+            reject(new Error('Canvas to Blob failed'));
+          }
+        }, 'image/jpeg', 0.85);
+      };
+      img.onerror = error => reject(error);
+    };
+    reader.onerror = error => reject(error);
+  });
 }

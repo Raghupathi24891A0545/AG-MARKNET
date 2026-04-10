@@ -53,6 +53,17 @@ def predict_disease():
         img_array = tf.expand_dims(tf.keras.utils.img_to_array(img), 0)
 
         predictions = model.predict(img_array, verbose=0)[0]
+        max_conf = float(np.max(predictions))
+        
+        # If the model is not confident, it's likely not a potato leaf
+        if max_conf < 0.65:
+            os.remove(filepath)
+            return jsonify({
+                "status": "success",
+                "is_recognized": False,
+                "error": "Image not recognized as a supported leaf or disease.",
+            })
+
         idx = np.argmax(predictions)
         res_class = CLASS_NAMES[idx]
         
@@ -66,6 +77,7 @@ def predict_disease():
         os.remove(filepath)
         return jsonify({
             "status": "success",
+            "is_recognized": True,
             "is_healthy": res_class == 'Potato___healthy',
             "diagnosis": diag,
             "all_scores": sorted(scores, key=lambda x: x['conf'], reverse=True)
