@@ -355,6 +355,22 @@ export function initCropDoctor() {
 
     let html = '';
 
+    // ---- Fallback Mode Indicator ----
+    if (data.analysis_mode === 'local_fallback') {
+      html += `
+        <div style="padding:var(--sp-md);background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);border-radius:var(--r-lg);margin-bottom:var(--sp-lg);display:flex;align-items:flex-start;gap:var(--sp-md);">
+          <span style="font-size:1.3rem;flex-shrink:0;">🔌</span>
+          <div>
+            <div style="font-weight:700;font-size:0.88rem;color:#93c5fd;margin-bottom:4px;">Offline Analysis Mode</div>
+            <div style="font-size:0.8rem;color:var(--c-text-secondary);line-height:1.6;">
+              The AI server is currently sleeping (free tier). This result uses local image color analysis as a quick estimate.
+              For full AI-powered diagnosis, try again in 1–2 minutes — the server is waking up in the background.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     // ---- Diagnosis Header ----
     html += `
       <div style="text-align:center;padding:var(--sp-xl);background:${sevBg[details.severity]};border:1px solid ${sevBorder[details.severity]};border-radius:var(--r-xl);margin-bottom:var(--sp-xl);">
