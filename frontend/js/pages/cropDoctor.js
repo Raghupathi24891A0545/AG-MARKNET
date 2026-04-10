@@ -11,7 +11,7 @@ export function renderCropDoctor() {
     <div class="page-section">
       <div class="page-header">
         <h1>🔬 Crop Doctor</h1>
-        <p>Upload a leaf photo for AI disease detection. Works for potato and other crops. (Telugu + English)</p>
+        <p>Upload a leaf photo for instant disease detection with treatment guidance. Supports potato and other crops.</p>
       </div>
 
       <div class="card crop-doctor-card">

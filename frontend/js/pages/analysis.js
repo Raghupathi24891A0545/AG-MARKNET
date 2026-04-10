@@ -17,7 +17,7 @@ export function renderAnalysis() {
     <div class="page-section">
       <div class="page-header">
         <h1>🌱 Farm Intelligence Analyzer</h1>
-        <p>AI-powered crop and fertilizer recommendations using live GPS, real soil data, and live weather</p>
+        <p>Accurate crop and fertilizer recommendations using live GPS, satellite soil data, and weather</p>
       </div>
 
       <div class="wizard">

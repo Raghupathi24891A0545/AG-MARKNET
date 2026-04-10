@@ -596,6 +596,43 @@ body::before {
 
 .btn-full { width: 100%; }
 
+/* Button click glow & ripple effect */
+.btn:active {
+  transform: scale(0.97) !important;
+  transition: transform 80ms ease;
+}
+
+.btn-primary:active {
+  box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.35), 0 0 30px rgba(22, 163, 74, 0.25);
+}
+
+.btn-accent:active {
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.35), 0 0 30px rgba(245, 158, 11, 0.25);
+}
+
+.btn-secondary:active {
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+  background: var(--c-surface-2);
+}
+
+/* Nav link click glow */
+.nav-link:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+}
+
+/* Feature card click glow */
+.feature-card:active {
+  transform: translateY(-2px) scale(0.98) !important;
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.25), 0 10px 40px rgba(0,0,0,0.4);
+}
+
+/* GPS button click glow */
+.gps-btn:active {
+  box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.3), 0 0 25px rgba(22, 163, 74, 0.2);
+  transform: scale(0.97);
+}
+
 /* GPS Button */
 .gps-btn {
   padding: 10px 18px;
@@ -1263,17 +1300,7 @@ body::before {
 
 .solution-list li::before { content: '✅'; flex-shrink: 0; }
 
-/* ===== FOOTER ===== */
-#footer-root {
-  position: relative;
-  z-index: 1;
-  border-top: 1px solid var(--c-border);
-  background: var(--c-bg-card);
-  padding: var(--sp-xl);
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--c-text-muted);
-}
+/* Footer styles are defined below in the consolidated footer section */
 
 /* ===== ANIMATIONS ===== */
 @keyframes fadeInDown {
@@ -1296,10 +1323,6 @@ body::before {
   to   { opacity: 1; transform: translateX(0); }
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 
 @keyframes spin {
   to { transform: rotate(360deg); }

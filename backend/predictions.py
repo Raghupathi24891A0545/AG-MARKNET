@@ -14,8 +14,7 @@ from config import (
     FERTILIZER_INFO, PEST_DATABASE, DEFAULT_PEST_INFO
 )
 
-# Crops to boost in priority if they are environmentally viable
-COMMON_CROPS = ['rice', 'wheat', 'cotton', 'maize', 'sugarcane']
+# No artificial crop boosting — let ML model decide purely from soil data
 
 # Indian State/Region heuristics for average soil attributes
 REGION_SOIL_PROFILES = {
@@ -75,29 +74,16 @@ def predict_crop(N, P, K, temperature, humidity, ph, rainfall):
     try:
         features = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
 
-        # Get probabilities for all crops
+        # Get probabilities for all crops — pure ML, no artificial boosting
         probabilities = crop_model.predict_proba(features)[0]
 
-        # Boost confidence for common crops if they show any baseline viability
-        enhanced_probabilities = list(probabilities)
-        for i, prob in enumerate(enhanced_probabilities):
-            crop_name = crop_encoder.inverse_transform([i])[0]
-            if crop_name.lower() in COMMON_CROPS and prob > 0.05:
-                # Multiply probability by 1.5 for common crops to boost them up the ranking
-                enhanced_probabilities[i] = min(0.99, prob * 1.5)
-
-        # Normalize probabilities back to 1.0 (100%)
-        total_prob = sum(enhanced_probabilities)
-        if total_prob > 0:
-            enhanced_probabilities = [p / total_prob for p in enhanced_probabilities]
-
-        # Top 5 crops using new enhanced probabilities
-        top_indices = np.argsort(enhanced_probabilities)[::-1][:5]
+        # Top 5 crops ranked purely by model confidence
+        top_indices = np.argsort(probabilities)[::-1][:5]
 
         results = []
         for idx in top_indices:
             crop_name = crop_encoder.inverse_transform([idx])[0]
-            confidence = round(enhanced_probabilities[idx] * 100, 2)
+            confidence = round(probabilities[idx] * 100, 2)
 
             if confidence > 0:
                 # Calculate profit

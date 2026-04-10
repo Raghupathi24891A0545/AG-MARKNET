@@ -9,8 +9,8 @@ let chatHistory = [];
 let currentLang = 'en';
 
 const BOT_GREETINGS = {
-  en: "👋 Namaste! I'm your Agri-Connect AI assistant. Ask me anything about crops, fertilizers, irrigation, diseases, weather, or market prices. I can help in English and Telugu!",
-  te: "👋 నమస్కారం! నేను మీ Agri-Connect AI సహాయకుడిని. పంటలు, ఎరువులు, నీటిపారుదల, వ్యాధులు, వాతావరణం, లేదా మార్కెట్ ధరల గురించి అడగండి!"
+  en: "👋 Namaste! I'm your AgriConnect farming assistant. Ask me anything about crops, fertilizers, irrigation, diseases, weather, or market prices. I can help in English and Telugu!",
+  te: "👋 నమస్కారం! నేను మీ AgriConnect వ్యవసాయ సహాయకుడిని. పంటలు, ఎరువులు, నీటిపారుదల, వ్యాధులు, వాతావరణం, లేదా మార్కెట్ ధరల గురించి అడగండి!"
 };
 
 const QUICK_QUESTIONS = {
@@ -37,8 +37,8 @@ export function renderChatbot() {
   return `
     <div class="page-section">
       <div class="page-header">
-        <h1>💬 Agri AI Assistant</h1>
-        <p>Ask farming questions in English or Telugu. Get instant, accurate advice powered by agricultural knowledge.</p>
+        <h1>💬 Farm Assistant</h1>
+        <p>Ask farming questions in English or Telugu. Get instant, accurate advice from agricultural knowledge base.</p>
       </div>
 
       <div class="grid-2" style="align-items:start;gap:var(--sp-xl);">
@@ -48,7 +48,7 @@ export function renderChatbot() {
           <div style="padding:var(--sp-lg);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:var(--sp-md);">
             <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--c-primary),var(--c-primary-dark));display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:0 0 20px var(--c-primary-glow);">🌱</div>
             <div>
-              <div style="font-weight:700;font-family:var(--font-display);">Agri-Connect AI</div>
+              <div style="font-weight:700;font-family:var(--font-display);">AgriConnect</div>
               <div style="font-size:0.75rem;color:var(--c-primary-light);">● Online · English & Telugu</div>
             </div>
             <div style="margin-left:auto;display:flex;gap:var(--sp-sm);">
