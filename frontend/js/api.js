@@ -119,11 +119,20 @@ export async function predictDisease(file, language = 'en') {
       method: 'POST',
       body: formData,
     });
-    const data = await res.json();
+    
+    // Check if the server returned HTML (often happens on Render 502/503 errors)
+    const textData = await res.text();
+    let data;
+    try {
+      data = JSON.parse(textData);
+    } catch {
+      throw new Error('AI detection server is down or waking up. Please try again in 30 seconds.');
+    }
+
     if (!res.ok && data.error) throw new Error(data.error);
     return data;
   } catch (err) {
-    if (err.message === 'Failed to fetch') {
+    if (err.message === 'Failed to fetch' || err.message.includes('Unexpected token')) {
       throw new Error('Disease detection server is starting up. Please try again in 30 seconds.');
     }
     throw err;
