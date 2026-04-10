@@ -1776,3 +1776,152 @@ input[type=number] { -moz-appearance: textfield; }
   font-size: 0.8rem;
   color: var(--c-text-secondary);
 }
+
+/* ============================================================
+   📊 DATA VISUALIZATION DASHBOARD STYLES
+   ============================================================ */
+
+/* Section Header */
+.viz-section-header {
+  text-align: center;
+  padding: var(--sp-xl) 0 var(--sp-md);
+  position: relative;
+}
+
+.viz-section-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--c-primary), var(--c-accent), var(--c-primary), transparent);
+  border-radius: 2px;
+  animation: shimmerLine 3s ease infinite;
+}
+
+@keyframes shimmerLine {
+  0%, 100% { opacity: 0.6; width: 120px; }
+  50% { opacity: 1; width: 200px; }
+}
+
+/* Viz Card — enhanced glass card with subtle animated border */
+.viz-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.viz-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    var(--c-primary),
+    var(--c-primary-light),
+    var(--c-accent),
+    var(--c-primary-light),
+    var(--c-primary)
+  );
+  background-size: 200% 100%;
+  animation: gradientSlide 4s ease infinite;
+  opacity: 0.7;
+}
+
+@keyframes gradientSlide {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.viz-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 16px 56px rgba(0, 0, 0, 0.5),
+    0 0 50px rgba(22, 163, 74, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.viz-card:hover::before {
+  opacity: 1;
+  height: 4px;
+}
+
+/* Chart description */
+.viz-desc {
+  font-size: 0.82rem;
+  color: var(--c-text-muted);
+  line-height: 1.55;
+  margin-bottom: var(--sp-lg);
+  max-width: 700px;
+}
+
+/* Chart container */
+.chart-container {
+  padding: var(--sp-sm);
+  border-radius: var(--r-lg);
+  background: rgba(10, 15, 13, 0.4);
+  border: 1px solid rgba(34, 197, 94, 0.06);
+  margin-bottom: var(--sp-md);
+  transition: var(--t-base);
+}
+
+.chart-container:hover {
+  background: rgba(10, 15, 13, 0.55);
+  border-color: rgba(34, 197, 94, 0.12);
+}
+
+/* Insight callout */
+.viz-insight {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-sm);
+  padding: var(--sp-md);
+  background: rgba(22, 163, 74, 0.04);
+  border: 1px solid rgba(22, 163, 74, 0.1);
+  border-radius: var(--r-md);
+  font-size: 0.78rem;
+  color: var(--c-text-secondary);
+  line-height: 1.55;
+  transition: var(--t-base);
+}
+
+.viz-insight:hover {
+  background: rgba(22, 163, 74, 0.08);
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+.viz-insight-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: -1px;
+}
+
+/* Canvas anti-aliasing helper */
+.viz-card canvas {
+  image-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Responsive chart sizing */
+@media (max-width: 768px) {
+  .chart-container {
+    padding: var(--sp-xs);
+  }
+  .viz-desc {
+    font-size: 0.78rem;
+  }
+  .viz-insight {
+    font-size: 0.74rem;
+    padding: var(--sp-sm);
+  }
+}
+
+@media (max-width: 600px) {
+  .viz-section-header h2 {
+    font-size: 1.1rem !important;
+  }
+}

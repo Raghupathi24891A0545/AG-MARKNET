@@ -5,6 +5,12 @@
 
 import { getMarketPrices } from '../api.js';
 import { showToast } from '../voice.js';
+import {
+  createMarketPriceChart,
+  createPriceDistributionChart,
+  createMarketSharePieChart,
+  createMSPComparisonChart
+} from '../charts.js';
 
 // Indian states for dropdown
 const INDIAN_STATES = [
@@ -370,7 +376,154 @@ async function searchMarket() {
       `;
     }
 
+    // ============================================================
+    // 📊  MARKET DATA VISUALIZATION SECTION
+    // ============================================================
+    if (markets.length >= 2) {
+      html += `
+        <div style="margin-top:var(--sp-2xl);margin-bottom:var(--sp-xl);">
+          <div class="viz-section-header">
+            <h2 class="section-title" style="font-size:1.3rem;border:none;padding:0;margin:0;">
+              <span class="icon">📊</span> Market Price Analytics
+            </h2>
+            <p style="font-size:0.85rem;color:var(--c-text-muted);margin-top:4px;">Visual analysis of ${result.crop || crop} prices across mandis</p>
+          </div>
+        </div>
+      `;
+
+      // -- MANDI PRICE COMPARISON CHART --
+      html += `
+        <div class="card viz-card" style="margin-bottom:var(--sp-xl);">
+          <h3 class="section-title"><span class="icon">📊</span> Top Mandi Price Comparison</h3>
+          <p class="viz-desc">Horizontal bar chart showing price per kg at top mandis. Yellow dashed line = average price. Green = above average, Red = below.</p>
+          <div class="chart-container" style="position:relative;height:${Math.max(320, Math.min(markets.length, 15) * 34)}px;">
+            <canvas id="chart-market-prices"></canvas>
+          </div>
+          <div class="viz-insight">
+            <span class="viz-insight-icon">🎯</span>
+            <span>Sell at green-bar mandis for the best price. Average: ₹${result.avg_price_per_kg}/kg</span>
+          </div>
+        </div>
+      `;
+
+      // -- DISTRICT PRICE DISTRIBUTION --
+      html += `
+        <div class="card viz-card" style="margin-bottom:var(--sp-xl);">
+          <h3 class="section-title"><span class="icon">🏘️</span> District-wise Price Distribution</h3>
+          <p class="viz-desc">Grouped bars showing Min, Modal (average), and Max price per quintal across districts</p>
+          <div class="chart-container" style="position:relative;height:360px;">
+            <canvas id="chart-price-distribution"></canvas>
+          </div>
+          <div class="viz-insight">
+            <span class="viz-insight-icon">💡</span>
+            <span>Wider gaps between Min and Max indicate more price volatility. Target districts with high modal prices.</span>
+          </div>
+        </div>
+      `;
+
+      // -- MARKET SHARE PIE + MSP COMPARISON --
+      html += `<div class="grid-2" style="margin-bottom:var(--sp-xl);">`;
+
+      // Market share donut
+      html += `
+        <div class="card viz-card">
+          <h3 class="section-title"><span class="icon">🥧</span> Mandi Distribution by District</h3>
+          <p class="viz-desc">How many mandis are reporting prices in each district</p>
+          <div class="chart-container" style="position:relative;max-width:400px;margin:0 auto;">
+            <canvas id="chart-market-share"></canvas>
+          </div>
+          <div class="viz-insight">
+            <span class="viz-insight-icon">📍</span>
+            <span>${Object.keys(markets.reduce((acc, m) => { acc[m.district || 'Other'] = 1; return acc; }, {})).length} districts reporting across ${markets.length} mandis</span>
+          </div>
+        </div>
+      `;
+
+      // MSP Comparison
+      const mspData = {
+        'Rice': 2300, 'Wheat': 2275, 'Maize': 2090, 'Cotton': 7020,
+        'Soybean': 4600, 'Groundnut': 6783, 'Chickpea': 5440,
+        'Lentil': 6425, 'Pigeon Pea': 7550, 'Sugarcane': 340,
+        'Tomato': 0, 'Potato': 0, 'Onion': 0,
+      };
+      const cropNameUpper = (result.crop || crop || '').charAt(0).toUpperCase() + (result.crop || crop || '').slice(1);
+      const lowerCropName = cropNameUpper.toLowerCase();
+      const mspKey = Object.keys(mspData).find(k => lowerCropName.includes(k.toLowerCase()));
+      const mspVal = mspKey ? mspData[mspKey] : 0;
+      const avgQtl = parseFloat(result.avg_price_per_quintal || (result.avg_price_per_kg * 100));
+
+      if (mspVal > 0 && avgQtl > 0) {
+        html += `
+          <div class="card viz-card">
+            <h3 class="section-title"><span class="icon">📋</span> MSP vs Market Price</h3>
+            <p class="viz-desc">Government MSP compared to today's market average for ${cropNameUpper}</p>
+            <div class="chart-container" style="position:relative;height:280px;">
+              <canvas id="chart-msp-comparison"></canvas>
+            </div>
+            <div class="viz-insight">
+              <span class="viz-insight-icon">${avgQtl >= mspVal ? '✅' : '⚠️'}</span>
+              <span>${avgQtl >= mspVal
+                ? `Market price is ₹${(avgQtl - mspVal).toFixed(0)} above MSP — good for farmers!`
+                : `Market price is ₹${(mspVal - avgQtl).toFixed(0)} below MSP — consider govt procurement.`}</span>
+            </div>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="card viz-card">
+            <h3 class="section-title"><span class="icon">📈</span> Price Summary</h3>
+            <p class="viz-desc">Quick overview of today's price range for ${cropNameUpper}</p>
+            <div style="display:flex;flex-direction:column;gap:var(--sp-md);padding:var(--sp-lg) 0;">
+              <div class="metric-row">
+                <span class="metric-label">Lowest Price</span>
+                <span class="metric-value cost">₹${result.min_price_per_kg}/kg</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Average Price</span>
+                <span class="metric-value highlight">₹${result.avg_price_per_kg}/kg</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Highest Price</span>
+                <span class="metric-value profit">₹${result.max_price_per_kg}/kg</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Price Spread</span>
+                <span class="metric-value">₹${(parseFloat(result.max_price_per_kg) - parseFloat(result.min_price_per_kg)).toFixed(2)}/kg</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Best Market</span>
+                <span class="metric-value highlight">${result.best_market || '—'}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      html += `</div>`;
+
+      // Store chart init vars for use after DOM write
+      var _mspVal = mspVal, _avgQtl = avgQtl, _cropNameUpper = cropNameUpper;
+    }
+
     document.getElementById('market-results').innerHTML = html;
+
+    // ---- Initialize Market Charts ----
+    if (markets.length >= 2) {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          try {
+            createMarketPriceChart('chart-market-prices', markets, result.crop || crop);
+            createPriceDistributionChart('chart-price-distribution', markets, result.crop || crop);
+            createMarketSharePieChart('chart-market-share', markets);
+            if (_mspVal > 0 && _avgQtl > 0) {
+              createMSPComparisonChart('chart-msp-comparison', _avgQtl, _mspVal, _cropNameUpper);
+            }
+          } catch (chartErr) {
+            console.warn('Market chart initialization error:', chartErr);
+          }
+        }, 200);
+      });
+    }
+
     showToast(`📡 ${markets.length} mandi prices fetched from Agmarknet`, 'success');
 
   } catch (err) {

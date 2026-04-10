@@ -5,6 +5,15 @@
 import { analyzeFarm, getSoilByCoords, getWeatherByCoords, predictCrop, predictFertilizer, getSoilAnalysis, getCurrentPosition, reverseGeocode } from '../api.js';
 import { showToast, setupMicButtons } from '../voice.js';
 import { t } from '../i18n.js';
+import {
+  createSoilRadarChart,
+  createCropSuitabilityChart,
+  createProfitChart,
+  createNPKDonutChart,
+  createCropBubbleChart,
+  createWeatherGaugeChart,
+  createFertilizerStageChart
+} from '../charts.js';
 
 let wizardStep = 1;
 let farmData = {};   // collected across wizard steps
@@ -909,6 +918,149 @@ async function renderResults(result, payload) {
     `;
   }
 
+  // ============================================================
+  // 📊  DATA VISUALIZATION DASHBOARD
+  // ============================================================
+  const soilForChart = {
+    N: soil.N || payload.N || 0,
+    P: soil.P || payload.P || 0,
+    K: soil.K || payload.K || 0,
+    ph: soil.ph || payload.ph || 0,
+    moisture_pct: soil.moisture_pct || payload.soil_moisture || 0,
+    organic_carbon: soil.organic_carbon || payload.organic_carbon || 0,
+  };
+
+  html += `
+    <div style="margin-top:var(--sp-2xl);margin-bottom:var(--sp-xl);">
+      <div class="viz-section-header">
+        <h2 class="section-title" style="font-size:1.3rem;border:none;padding:0;margin:0;">
+          <span class="icon">📊</span> Data Visualization Dashboard
+        </h2>
+        <p style="font-size:0.85rem;color:var(--c-text-muted);margin-top:4px;">Interactive charts based on your farm analysis results</p>
+      </div>
+    </div>
+  `;
+
+  // -- SOIL NUTRIENT RADAR + WEATHER GAUGE --
+  html += `
+    <div class="grid-2" style="margin-bottom:var(--sp-xl);">
+      <div class="card viz-card">
+        <h3 class="section-title"><span class="icon">🧪</span> Soil Nutrient Analysis</h3>
+        <p class="viz-desc">Radar chart comparing your soil's NPK, pH, moisture, and organic carbon against ideal ranges</p>
+        <div class="chart-container" style="position:relative;max-width:420px;margin:0 auto;">
+          <canvas id="chart-soil-radar"></canvas>
+        </div>
+        <div class="viz-insight">
+          <span class="viz-insight-icon">💡</span>
+          <span>Green area = Your soil. Amber dashed = Ideal range. Larger green overlap with amber means healthier soil.</span>
+        </div>
+      </div>
+
+      <div class="card viz-card">
+        <h3 class="section-title"><span class="icon">🌤️</span> Current Weather Conditions</h3>
+        <p class="viz-desc">Polar area chart of live weather factors affecting crop growth</p>
+        <div class="chart-container" style="position:relative;max-width:420px;margin:0 auto;">
+          <canvas id="chart-weather-gauge"></canvas>
+        </div>
+        <div class="viz-insight">
+          <span class="viz-insight-icon">💡</span>
+          <span>Temperature: ${weather.temperature}°C · Humidity: ${weather.humidity}% · Wind: ${weather.wind_speed} m/s</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // -- CROP SUITABILITY CHART --
+  if (allFeasible.length > 0 || top3.length > 0) {
+    const charted = allFeasible.length > 0 ? allFeasible.slice(0, 10) : top3;
+    html += `
+      <div class="card viz-card" style="margin-bottom:var(--sp-xl);">
+        <h3 class="section-title"><span class="icon">🏆</span> Crop Suitability Comparison</h3>
+        <p class="viz-desc">Horizontal bar chart ranking all feasible crops by suitability score based on your soil, weather, and season</p>
+        <div class="chart-container" style="position:relative;height:${Math.max(280, charted.length * 38)}px;">
+          <canvas id="chart-crop-suitability"></canvas>
+        </div>
+        <div class="viz-insight">
+          <span class="viz-insight-icon">🎯</span>
+          <span>Green bars ≥75% = Excellent fit · Blue bars = Good fit · Red bars = Below average for your conditions</span>
+        </div>
+      </div>
+    `;
+  }
+
+  // -- PROFIT ANALYSIS CHART --
+  if (top3.length > 0) {
+    html += `
+      <div class="card viz-card" style="margin-bottom:var(--sp-xl);">
+        <h3 class="section-title"><span class="icon">💰</span> Profit & Revenue Analysis</h3>
+        <p class="viz-desc">Comparative financial analysis — Revenue (blue), Cost (red), and Net Profit trend (green line) for recommended crops</p>
+        <div class="chart-container" style="position:relative;height:340px;">
+          <canvas id="chart-profit"></canvas>
+        </div>
+        <div class="viz-insight">
+          <span class="viz-insight-icon">📈</span>
+          <span>The green line shows net profit trend. Higher green line = more profitable crop for your farm.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  // -- CROP BUBBLE CHART (Duration vs Suitability vs Profit) --
+  if (allFeasible.length > 1 || top3.length > 1) {
+    html += `
+      <div class="card viz-card" style="margin-bottom:var(--sp-xl);">
+        <h3 class="section-title"><span class="icon">🫧</span> Crop Intelligence Bubble Map</h3>
+        <p class="viz-desc">Each bubble = one crop. X-axis = growing duration, Y-axis = suitability score, Bubble size = profit potential</p>
+        <div class="chart-container" style="position:relative;height:360px;">
+          <canvas id="chart-crop-bubble"></canvas>
+        </div>
+        <div class="viz-insight">
+          <span class="viz-insight-icon">🔍</span>
+          <span>Top-right = High suitability, longer growing. Top-left = High suitability, quick harvest. Larger bubble = higher profit.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  // -- FERTILIZER NPK DONUT + STAGES CHART --
+  if (fert && (fert.recommended_fertilizer || (fert.stage_wise_application && fert.stage_wise_application.length > 0))) {
+    html += `<div class="grid-2" style="margin-bottom:var(--sp-xl);">`;
+
+    // NPK Donut
+    const bf2 = fert.recommended_fertilizer || {};
+    html += `
+      <div class="card viz-card">
+        <h3 class="section-title"><span class="icon">🧬</span> NPK Composition</h3>
+        <p class="viz-desc">Nutrient ratio breakdown of the recommended fertilizer</p>
+        <div class="chart-container" style="position:relative;max-width:320px;margin:0 auto;">
+          <canvas id="chart-npk-donut"></canvas>
+        </div>
+        <div class="viz-insight">
+          <span class="viz-insight-icon">🧪</span>
+          <span>Recommended: ${bf2.fertilizer || '—'} · NPK Ratio: ${bf2.details?.npk || '—'} · Qty: ${bf2.details?.qty_per_ha || '—'} kg/ha</span>
+        </div>
+      </div>
+    `;
+
+    // Stages chart
+    if (fert.stage_wise_application && fert.stage_wise_application.length > 0) {
+      html += `
+        <div class="card viz-card">
+          <h3 class="section-title"><span class="icon">📅</span> Stage-wise Fertilizer Application</h3>
+          <p class="viz-desc">NPK distribution across different crop growth stages</p>
+          <div class="chart-container" style="position:relative;height:280px;">
+            <canvas id="chart-fert-stages"></canvas>
+          </div>
+          <div class="viz-insight">
+            <span class="viz-insight-icon">⏱️</span>
+            <span>Apply the right nutrients at the right stage for maximum crop yield and resource efficiency</span>
+          </div>
+        </div>
+      `;
+    }
+    html += `</div>`;
+  }
+
   // ---- BACK BUTTON ----
   html += `
     <div style="text-align:center;margin-top:var(--sp-2xl);">
@@ -918,7 +1070,65 @@ async function renderResults(result, payload) {
     </div>
   `;
 
+  // ---- Store data for chart initialization ----
+  const chartPayload = {
+    soilForChart,
+    weather,
+    top3,
+    allFeasible,
+    fert,
+  };
+
   resultsEl.innerHTML = html;
+
+  // ---- Initialize all charts after DOM render ----
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      try {
+        // Soil Radar
+        createSoilRadarChart('chart-soil-radar', chartPayload.soilForChart);
+
+        // Weather Gauge
+        createWeatherGaugeChart('chart-weather-gauge', chartPayload.weather);
+
+        // Crop Suitability
+        const suitCrops = chartPayload.allFeasible.length > 0
+          ? chartPayload.allFeasible.slice(0, 10)
+          : chartPayload.top3;
+        if (suitCrops.length > 0) {
+          createCropSuitabilityChart('chart-crop-suitability', suitCrops);
+        }
+
+        // Profit Chart
+        if (chartPayload.top3.length > 0) {
+          const profitCrops = chartPayload.allFeasible.length > 2
+            ? chartPayload.allFeasible.slice(0, 6)
+            : chartPayload.top3;
+          createProfitChart('chart-profit', profitCrops);
+        }
+
+        // Bubble Chart
+        const bubbleCrops = chartPayload.allFeasible.length > 1
+          ? chartPayload.allFeasible.slice(0, 8)
+          : chartPayload.top3;
+        if (bubbleCrops.length > 1) {
+          createCropBubbleChart('chart-crop-bubble', bubbleCrops);
+        }
+
+        // Fertilizer NPK Donut
+        if (chartPayload.fert && chartPayload.fert.recommended_fertilizer) {
+          createNPKDonutChart('chart-npk-donut', chartPayload.fert.recommended_fertilizer);
+        }
+
+        // Fertilizer Stages
+        if (chartPayload.fert?.stage_wise_application?.length > 0) {
+          createFertilizerStageChart('chart-fert-stages', chartPayload.fert.stage_wise_application);
+        }
+      } catch (chartErr) {
+        console.warn('Chart initialization error:', chartErr);
+      }
+    }, 150);
+  });
 
   // Post-process table translations to avoid making 30x sequential requests blocking UI render
   if (lang !== 'en') {
