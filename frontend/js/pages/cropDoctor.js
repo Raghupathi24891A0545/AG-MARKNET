@@ -453,9 +453,10 @@ export function initCropDoctor() {
       </div>
     `;
 
-    // ---- Scan Again ----
+    // ---- Ask Expert & Scan Again ----
     html += `
-      <div style="text-align:center;">
+      <div style="display:flex; gap:var(--sp-md); justify-content:center; flex-wrap:wrap; margin-top:var(--sp-xl);">
+        ${!isHealthy ? '<button class="btn btn-accent btn-lg" id="cd-ask-expert">👨‍🌾 Ask an Expert</button>' : ''}
         <button class="btn btn-primary btn-lg" id="cd-scan-again">🔄 Scan Another Leaf</button>
       </div>
     `;
@@ -464,6 +465,9 @@ export function initCropDoctor() {
 
     document.getElementById('cd-scan-again')?.addEventListener('click', () => {
       resetToUpload();
+    });
+    document.getElementById('cd-ask-expert')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('navigate', { detail: 'experts' }));
     });
   }
 

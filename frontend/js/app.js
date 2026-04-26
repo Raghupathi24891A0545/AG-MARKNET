@@ -12,6 +12,7 @@ import { renderAnalysis, initAnalysis } from './pages/analysis.js';
 import { renderCropDoctor, initCropDoctor } from './pages/cropDoctor.js';
 import { renderChatbot, initChatbot } from './pages/chatbot.js';
 import { renderAlerts, initAlerts } from './pages/alerts.js';
+import { renderExperts, initExperts } from './pages/experts.js';
 import { initVoice } from './voice.js';
 import { onLangChange } from './i18n.js';
 
@@ -26,6 +27,7 @@ const routes = {
   cropDoctor:{ render: renderCropDoctor,init: initCropDoctor,label: 'Crop Doctor',icon: '🔬' },
   chatbot:   { render: renderChatbot,   init: initChatbot,  label: 'Chatbot',  icon: '💬' },
   alerts:    { render: renderAlerts,    init: initAlerts,   label: 'Alerts',   icon: '🚨' },
+  experts:   { render: renderExperts,   init: initExperts,  label: 'Experts',  icon: '👨‍🌾' },
 };
 
 let currentPage = 'home';

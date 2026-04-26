@@ -15,6 +15,7 @@ const strings = {
     nav_cropDoctor: 'Crop Doctor',
     nav_chatbot: 'Chatbot',
     nav_alerts: 'Alerts',
+    nav_experts: 'Experts',
 
     // Common
     loading: 'Loading...',
@@ -149,6 +150,13 @@ const strings = {
     doctor_desc: 'Upload a leaf photo for AI-powered disease identification and treatment advice',
     upload_image: 'Upload Leaf Image',
     detect: '🔬 Detect Disease',
+
+    // Experts
+    experts_title: '👨‍🌾 Contact Agriculture Experts',
+    experts_desc: 'Connect directly with certified agronomists and plant pathologists for professional advice.',
+    expert_call: 'Call Now',
+    expert_whatsapp: 'WhatsApp',
+    expert_specialty: 'Specialty: ',
   },
   te: {
     // Navbar
@@ -159,6 +167,7 @@ const strings = {
     nav_cropDoctor: 'పంట వైద్యుడు',
     nav_chatbot: 'చాట్‌బాట్',
     nav_alerts: 'హెచ్చరికలు',
+    nav_experts: 'నిపుణులు',
 
     // Common
     loading: 'లోడ్ అవుతోంది...',
@@ -293,6 +302,13 @@ const strings = {
     doctor_desc: 'AI-ఆధారిత వ్యాధి గుర్తింపు మరియు చికిత్స సలహా కోసం ఆకు ఫోటో అప్‌లోడ్ చేయండి',
     upload_image: 'ఆకు చిత్రాన్ని అప్‌లోడ్ చేయండి',
     detect: '🔬 వ్యాధిని కనుగొని',
+
+    // Experts
+    experts_title: '👨‍🌾 వ్యవసాయ నిపుణులను సంప్రదించండి',
+    experts_desc: 'వృత్తిపరమైన సలహా కోసం సర్టిఫైడ్ వ్యవసాయ శాస్త్రవేత్తలు మరియు మొక్కల రోగ నిపుణులతో నేరుగా కనెక్ట్ అవ్వండి.',
+    expert_call: 'ఇప్పుడే కాల్ చేయండి',
+    expert_whatsapp: 'వాట్సాప్',
+    expert_specialty: 'ప్రత్యేకత: ',
   }
 };
 

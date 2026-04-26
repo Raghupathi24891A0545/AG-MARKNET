@@ -21,10 +21,11 @@ export function renderNavbar(activePage, routes) {
     cropDoctor: t('nav_cropDoctor'),
     chatbot: t('nav_chatbot'),
     alerts: t('nav_alerts'),
+    experts: t('nav_experts'),
   };
 
   const navLinks = Object.entries(routes)
-    .filter(([key]) => ['home', 'analysis', 'weather', 'market', 'cropDoctor', 'chatbot', 'alerts'].includes(key))
+    .filter(([key]) => ['home', 'analysis', 'weather', 'market', 'cropDoctor', 'chatbot', 'alerts', 'experts'].includes(key))
     .map(([key, r]) => `
       <button class="nav-link ${activePage === key ? 'active' : ''}" data-navigate="${key}" id="nav-${key}">
         ${r.icon} <span class="hide-mobile">${labelMap[key] || r.label}</span>
