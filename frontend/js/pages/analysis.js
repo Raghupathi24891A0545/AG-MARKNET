@@ -63,6 +63,25 @@ export function renderAnalysis() {
                 📡 Capture My Farm Location (GPS)
               </button>
               <div id="gps-status" style="margin-top:var(--sp-md);font-size:0.85rem;color:var(--c-text-muted);"></div>
+
+              <!-- Map Tracking Animation -->
+              <div id="map-radar-container" style="display:none; margin: 20px auto; max-width: 400px; height: 200px; background: #e0e7ff; border-radius: 12px; position: relative; overflow: hidden; border: 2px solid #818cf8; box-shadow: inset 0 0 20px rgba(0,0,0,0.1);">
+                <div style="position: absolute; inset: 0; background-image: radial-gradient(#3b82f6 1px, transparent 1px); background-size: 15px 15px; opacity: 0.3;"></div>
+                <div style="position: absolute; top: 50%; left: 50%; width: 300px; height: 300px; background: conic-gradient(from 0deg, transparent 70%, rgba(59, 130, 246, 0.6) 100%); transform-origin: center center; animation: radar-spin 2s linear infinite; margin-top: -150px; margin-left: -150px; border-radius: 50%;"></div>
+                <div style="position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; background: #2563eb; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 15px 5px rgba(37, 99, 235, 0.6);"></div>
+                <div style="position: absolute; bottom: 10px; width: 100%; text-align: center; color: #1e3a8a; font-weight: bold; font-size: 0.9rem; z-index: 10; text-shadow: 0 0 4px white;">🛰️ Aligning with Satellites...</div>
+                <style>
+                  @keyframes radar-spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                  }
+                </style>
+              </div>
+
+              <!-- Live Map iframe Container -->
+              <div id="map-iframe-container" style="display:none; margin: 20px auto; max-width: 100%; height: 250px; border-radius: 12px; overflow: hidden; border: 1px solid var(--c-border); box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <iframe id="location-map-iframe" width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src=""></iframe>
+              </div>
             </div>
 
             <!-- GPS Result Display -->
@@ -347,10 +366,17 @@ async function captureGPS() {
   const btn = document.getElementById('gps-btn');
   const status = document.getElementById('gps-status');
   const resultDiv = document.getElementById('gps-result');
+  const radarDiv = document.getElementById('map-radar-container');
+  const mapIframeDiv = document.getElementById('map-iframe-container');
+  const mapIframe = document.getElementById('location-map-iframe');
 
   btn.textContent = '📡 Locating...';
   btn.classList.add('loading');
   status.textContent = 'Requesting GPS signal...';
+
+  if (resultDiv) resultDiv.style.display = 'none';
+  if (mapIframeDiv) mapIframeDiv.style.display = 'none';
+  if (radarDiv) radarDiv.style.display = 'block';
 
   try {
     const pos = await getCurrentPosition();
@@ -358,6 +384,14 @@ async function captureGPS() {
     farmData.lon = pos.lon;
 
     status.textContent = `✅ GPS captured (accuracy: ±${Math.round(pos.accuracy)}m). Reverse geocoding...`;
+
+    // Show live map iframe
+    if (radarDiv) radarDiv.style.display = 'none';
+    if (mapIframeDiv && mapIframe) {
+      const iframeSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${pos.lon-0.005},${pos.lat-0.005},${pos.lon+0.005},${pos.lat+0.005}&layer=mapnik&marker=${pos.lat},${pos.lon}`;
+      mapIframe.src = iframeSrc;
+      mapIframeDiv.style.display = 'block';
+    }
 
     // Reverse geocode
     try {
@@ -388,6 +422,9 @@ async function captureGPS() {
   } catch (err) {
     showToast(err.message, 'error');
     status.textContent = '❌ ' + err.message;
+    if (document.getElementById('map-radar-container')) {
+      document.getElementById('map-radar-container').style.display = 'none';
+    }
   } finally {
     btn.textContent = '📡 Capture My Farm Location (GPS)';
     btn.classList.remove('loading');
