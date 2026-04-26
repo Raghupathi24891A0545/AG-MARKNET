@@ -5,7 +5,7 @@
 import '../css/style.css';
 import { renderNavbar } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
-import { renderHome } from './pages/home.js';
+import { renderHome, initHome } from './pages/home.js';
 import { renderWeather, initWeather } from './pages/weather.js';
 import { renderMarket, initMarket } from './pages/market.js';
 import { renderAnalysis, initAnalysis } from './pages/analysis.js';
@@ -20,7 +20,7 @@ import { onLangChange } from './i18n.js';
 // ROUTES
 // ============================================================
 const routes = {
-  home:      { render: renderHome,      init: null,         label: 'Home',     icon: '🏠' },
+  home:      { render: renderHome,      init: initHome,     label: 'Home',     icon: '🏠' },
   analysis:  { render: renderAnalysis,  init: initAnalysis, label: 'Analyzer', icon: '🌱' },
   weather:   { render: renderWeather,   init: initWeather,  label: 'Weather',  icon: '🌤️' },
   market:    { render: renderMarket,    init: initMarket,   label: 'Market',   icon: '📊' },
