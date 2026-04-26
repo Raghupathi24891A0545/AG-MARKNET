@@ -2313,6 +2313,28 @@ input[type=number] { -moz-appearance: textfield; }
   gap: var(--sp-md);
 }
 
+.expert-avatar-photo {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 3px solid;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.expert-avatar-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.expert-card:hover .expert-avatar-photo {
+  transform: scale(1.1) rotate(-3deg);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
 .expert-avatar {
   width: 56px; height: 56px;
   border-radius: var(--r-lg);
@@ -2441,6 +2463,15 @@ input[type=number] { -moz-appearance: textfield; }
 .expert-btn-whatsapp:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(37,211,102,0.35);
+}
+
+.expert-btn-callonly {
+  background: var(--c-surface);
+  color: var(--c-text-muted);
+  border: 1px solid var(--c-border);
+  cursor: default;
+  font-size: 0.8rem;
+  opacity: 0.7;
 }
 
 /* Disclaimer */
