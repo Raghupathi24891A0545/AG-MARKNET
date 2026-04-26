@@ -1186,9 +1186,55 @@ body::before {
   font-size: clamp(2.5rem, 7vw, 5rem);
   font-weight: 900;
   letter-spacing: -2px;
-  line-height: 1.05;
+  line-height: 1.1;
   margin-bottom: var(--sp-xl);
-  animation: fadeInUp 0.6s 0.1s ease both;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.hero-word-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+  flex-wrap: wrap;
+}
+
+.hero-word {
+  display: inline-block;
+  opacity: 0;
+  will-change: transform, opacity, filter;
+}
+
+.hero-word.green {
+  background: linear-gradient(135deg, var(--c-primary-light), #86efac);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-word.hero-word-animate {
+  animation: heroWordJumbleIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes heroWordJumbleIn {
+  0% {
+    opacity: 0;
+    transform: translateY(80px) translateX(calc(-30px + var(--word-i) * 15px)) rotate(calc(-12deg + var(--word-i) * 4deg)) scale(0.3);
+    filter: blur(12px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-10px) translateX(5px) rotate(2deg) scale(1.08);
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) translateX(0) rotate(0) scale(1);
+    filter: blur(0);
+  }
 }
 
 .hero-title .green {
@@ -1198,13 +1244,26 @@ body::before {
   background-clip: text;
 }
 
+/* Hero elements that animate in after the words */
+.hero-anim {
+  opacity: 0;
+}
+
+.hero-anim.hero-anim-active {
+  animation: heroElementFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes heroElementFadeIn {
+  0% { opacity: 0; transform: translateY(30px); filter: blur(4px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
 .hero-subtitle {
   font-size: clamp(1rem, 2.5vw, 1.25rem);
   color: var(--c-text-secondary);
   max-width: 600px;
   line-height: 1.7;
   margin-bottom: var(--sp-2xl);
-  animation: fadeInUp 0.6s 0.2s ease both;
 }
 
 .hero-ctas {
@@ -1212,7 +1271,6 @@ body::before {
   gap: var(--sp-md);
   justify-content: center;
   flex-wrap: wrap;
-  animation: fadeInUp 0.6s 0.3s ease both;
 }
 
 .feature-grid {
@@ -1933,32 +1991,37 @@ input[type=number] { -moz-appearance: textfield; }
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
-  z-index: 0;
+  z-index: 2;
   overflow: hidden;
 }
 
 .floating-petal {
   position: absolute;
-  top: -5%;
-  animation: petalFall linear infinite;
+  top: -6%;
+  animation: petalFall var(--fall-duration, 18s) linear var(--fall-delay, 0s) infinite;
   pointer-events: none;
-  filter: blur(0.5px);
-  will-change: transform;
+  will-change: transform, opacity;
+  user-select: none;
+  line-height: 1;
 }
 
 @keyframes petalFall {
   0% {
-    transform: translateY(-10vh) rotate(0deg) translateX(0);
+    transform: translateY(-10vh) rotate(0deg) translateX(0px);
     opacity: 0;
   }
-  10% {
+  5% {
     opacity: var(--petal-opacity, 0.25);
   }
-  90% {
+  50% {
+    transform: translateY(50vh) rotate(calc(var(--spin, 360deg) * 0.5)) translateX(var(--drift-x, 40px));
     opacity: var(--petal-opacity, 0.25);
+  }
+  95% {
+    opacity: var(--petal-opacity, 0.15);
   }
   100% {
-    transform: translateY(110vh) rotate(720deg) translateX(80px);
+    transform: translateY(110vh) rotate(var(--spin, 720deg)) translateX(calc(var(--drift-x, 40px) * -0.5));
     opacity: 0;
   }
 }

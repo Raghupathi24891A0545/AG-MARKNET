@@ -71,6 +71,9 @@ function navigateTo(page) {
 // INIT
 // ============================================================
 function init() {
+  // Spawn global floating flower petals (persists across all pages)
+  spawnGlobalFlowerPetals();
+
   renderFooter();
   initVoice();
 
@@ -88,4 +91,36 @@ function init() {
   });
 }
 
+// ============================================================
+// GLOBAL FLOATING FLOWER PETALS — Always visible on all pages
+// ============================================================
+function spawnGlobalFlowerPetals() {
+  // Don't duplicate if already spawned
+  if (document.getElementById('global-petals')) return;
+
+  const container = document.createElement('div');
+  container.id = 'global-petals';
+  container.className = 'flower-petals-container';
+  document.body.appendChild(container);
+
+  const petals = ['🌸', '🌺', '🌻', '🌼', '🌷', '🍃', '🌿', '☘️', '🍂', '🌾'];
+  const count = 30;
+
+  for (let i = 0; i < count; i++) {
+    const petal = document.createElement('div');
+    petal.className = 'floating-petal';
+    petal.textContent = petals[Math.floor(Math.random() * petals.length)];
+    petal.style.left = `${Math.random() * 100}%`;
+    petal.style.setProperty('--fall-duration', `${14 + Math.random() * 20}s`);
+    petal.style.setProperty('--fall-delay', `${Math.random() * 18}s`);
+    petal.style.setProperty('--drift-x', `${-60 + Math.random() * 120}px`);
+    petal.style.setProperty('--petal-size', `${0.9 + Math.random() * 1.1}rem`);
+    petal.style.setProperty('--petal-opacity', `${0.18 + Math.random() * 0.22}`);
+    petal.style.setProperty('--spin', `${Math.random() > 0.5 ? '' : '-'}${400 + Math.random() * 400}deg`);
+    petal.style.fontSize = `var(--petal-size)`;
+    container.appendChild(petal);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', init);
+

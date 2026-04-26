@@ -8,9 +8,6 @@ let hasPlayedIntro = false;
 
 export function renderHome() {
   return `
-    <!-- Floating Flower Petals Background -->
-    <div class="flower-petals-container" id="flower-petals"></div>
-
     <!-- Grand Intro Overlay (plays once) -->
     ${!hasPlayedIntro ? `
     <div class="grand-intro-overlay" id="grand-intro">
@@ -36,19 +33,29 @@ export function renderHome() {
     ` : ''}
 
     <div class="hero-section">
-      <div class="hero-badge">${t('hero_badge')}</div>
+      <div class="hero-badge hero-anim" style="--anim-order:0">${t('hero_badge')}</div>
 
       <h1 class="hero-title">
-        ${t('hero_title_1')}<br>
-        <span class="green">${t('hero_title_2')}</span><br>
-        ${t('hero_title_3')}
+        <span class="hero-word-line">
+          <span class="hero-word" style="--word-i:0">${t('hero_title_1').split(' ')[0] || 'Smart'}</span>
+          <span class="hero-word" style="--word-i:1">${t('hero_title_1').split(' ')[1] || 'Farming'}</span>
+        </span>
+        <span class="hero-word-line">
+          <span class="hero-word green" style="--word-i:2">${t('hero_title_2').split(' ')[0] || 'Made'}</span>
+          <span class="hero-word green" style="--word-i:3">${t('hero_title_2').split(' ')[1] || 'Simple'}</span>
+        </span>
+        <span class="hero-word-line">
+          <span class="hero-word" style="--word-i:4">${t('hero_title_3').split(' ')[0] || 'For'}</span>
+          <span class="hero-word" style="--word-i:5">${t('hero_title_3').split(' ')[1] || 'Every'}</span>
+          <span class="hero-word" style="--word-i:6">${t('hero_title_3').split(' ')[2] || 'Farmer'}</span>
+        </span>
       </h1>
 
-      <p class="hero-subtitle">
+      <p class="hero-subtitle hero-anim" style="--anim-order:7">
         ${t('hero_subtitle')}
       </p>
 
-      <div class="hero-ctas">
+      <div class="hero-ctas hero-anim" style="--anim-order:8">
         <button class="btn btn-accent btn-lg" data-navigate="analysis" id="hero-start-btn">
           ${t('hero_cta_analyze')}
         </button>
@@ -60,7 +67,7 @@ export function renderHome() {
         </button>
       </div>
 
-      <div class="feature-grid" style="max-width:1100px;margin-top:var(--sp-3xl);">
+      <div class="feature-grid hero-anim" style="max-width:1100px;margin-top:var(--sp-3xl);--anim-order:9">
         <div class="feature-card" data-navigate="analysis">
           <span class="feature-card-icon">🌱</span>
           <div class="feature-card-title">${t('feature_crop_rec')}</div>
@@ -107,52 +114,51 @@ export function renderHome() {
 }
 
 export function initHome() {
-  // Spawn floating flower petals
-  spawnFlowerPetals();
+  const isFirstVisit = !hasPlayedIntro;
+  const introDelay = isFirstVisit ? 3400 : 0;
 
   // Grand intro animation (plays only once per session)
   if (!hasPlayedIntro) {
     hasPlayedIntro = true;
     const overlay = document.getElementById('grand-intro');
     if (overlay) {
-      // Spawn intro sparkles
       spawnIntroParticles();
 
       // Auto-dismiss intro after animation completes
       setTimeout(() => {
         overlay.classList.add('intro-exit');
-        setTimeout(() => {
-          overlay.remove();
-        }, 800);
+        setTimeout(() => overlay.remove(), 800);
       }, 3200);
 
       // Allow click to skip
       overlay.addEventListener('click', () => {
         overlay.classList.add('intro-exit');
         setTimeout(() => overlay.remove(), 600);
+        // Trigger hero words immediately on skip
+        triggerHeroWords(200);
       });
     }
   }
+
+  // Trigger the heroic word-by-word title animation after intro
+  triggerHeroWords(introDelay);
 }
 
-function spawnFlowerPetals() {
-  const container = document.getElementById('flower-petals');
-  if (!container) return;
+function triggerHeroWords(baseDelay) {
+  // Animate each hero word with staggered dramatic entry
+  const words = document.querySelectorAll('.hero-word');
+  words.forEach((word, i) => {
+    word.style.animationDelay = `${baseDelay + i * 120}ms`;
+    word.classList.add('hero-word-animate');
+  });
 
-  const petals = ['🌸', '🌺', '🌻', '🌼', '🌷', '🍃', '🌿', '☘️', '🍂', '🌾'];
-  const count = 25;
-
-  for (let i = 0; i < count; i++) {
-    const petal = document.createElement('div');
-    petal.className = 'floating-petal';
-    petal.textContent = petals[Math.floor(Math.random() * petals.length)];
-    petal.style.left = `${Math.random() * 100}%`;
-    petal.style.animationDuration = `${12 + Math.random() * 18}s`;
-    petal.style.animationDelay = `${Math.random() * 15}s`;
-    petal.style.fontSize = `${0.8 + Math.random() * 1.2}rem`;
-    petal.style.opacity = `${0.15 + Math.random() * 0.25}`;
-    container.appendChild(petal);
-  }
+  // Animate other hero elements
+  const heroAnims = document.querySelectorAll('.hero-anim');
+  heroAnims.forEach((el) => {
+    const order = parseInt(el.style.getPropertyValue('--anim-order') || '0');
+    el.style.animationDelay = `${baseDelay + 600 + order * 100}ms`;
+    el.classList.add('hero-anim-active');
+  });
 }
 
 function spawnIntroParticles() {
