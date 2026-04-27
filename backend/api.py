@@ -1148,7 +1148,7 @@ def chatbot():
     if gemini_key and genai is not None:
         try:
             genai.configure(api_key=gemini_key)
-            model = genai.GenerativeModel('gemini-2.0-flash')
+            model = genai.GenerativeModel('gemini-1.5-flash')
             
             # Comprehensive system prompt
             system_prompt = (
