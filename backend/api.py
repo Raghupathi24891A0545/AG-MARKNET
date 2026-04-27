@@ -1130,14 +1130,17 @@ def get_alerts():
 
 
 # ============================================================
-# CHATBOT (GEMINI AI Integration)
+# CHATBOT (GEMINI AI Integration — Full-Power Assistant)
 # ============================================================
 @app.route("/api/chat", methods=["POST"])
 def chatbot():
-    """Smart farming chatbot powered by Gemini (with rule-based fallback)."""
+    """Full-power AI chatbot — works like ChatGPT/Gemini for farmers & general queries."""
     data = request.get_json() or {}
     message = data.get("message", "").strip()
     lang = data.get("language", "en")
+    
+    if not message:
+        return jsonify({"reply": "Please type a question!", "language": "en", "timestamp": datetime.now(timezone.utc).isoformat()})
     
     gemini_key = os.getenv("GEMINI_API_KEY")
     
@@ -1145,65 +1148,83 @@ def chatbot():
     if gemini_key and genai is not None:
         try:
             genai.configure(api_key=gemini_key)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            model = genai.GenerativeModel('gemini-2.0-flash')
             
-            # Instruct Gemini to behave as an Indian agricultural expert
-            prompt = (
-                f"You are Agri-Connect AI, an expert agricultural assistant helping an Indian farmer. "
-                f"The user is asking: '{message}'. "
-                f"Give a helpful, accurate, but concise farming response (under 3 sentences). "
-                f"Do NOT use markdown. Reply directly in English."
+            # Comprehensive system prompt
+            system_prompt = (
+                "You are AgriConnect AI — a world-class intelligent assistant built for Indian farmers, "
+                "agricultural professionals, and rural communities. You have deep expertise in agriculture, "
+                "farming, animal husbandry, horticulture, fisheries, government schemes, rural finance, "
+                "weather, soil science, crop management, pest control, and market intelligence.\n\n"
+                "RULES:\n"
+                "1. You are NOT limited to agriculture. Answer ANY question like ChatGPT or Gemini would.\n"
+                "2. For farming questions, give expert-level, detailed, actionable advice with specific "
+                "quantities, timings, product names, and scientific backing.\n"
+                "3. For general questions, answer accurately and helpfully.\n"
+                "4. Be warm, conversational, and respectful.\n"
+                "5. Use clear formatting with bullet points and bold for key terms.\n"
+                "6. Give comprehensive, detailed answers — not short 2-3 sentence replies.\n"
+                "7. For crop/fertilizer/pesticide questions, include specific dosages, brand names, timing, costs.\n"
+                "8. NEVER refuse to answer. You are a helpful, all-knowing assistant.\n"
             )
+            
+            prompt = f"{system_prompt}\n\nUser's question: {message}"
+            
             response = model.generate_content(prompt)
-            reply_text = response.text.replace('*', '').strip()
+            reply_text = response.text.strip()
             
             return jsonify({
                 "reply": reply_text,
-                "language": "en",  # We tell frontend the raw is English, frontend translates to Telugu
+                "language": "en",
+                "source": "gemini_ai",
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             })
         except Exception as e:
             print(f"Gemini AI Error: {e}. Falling back to rules.")
     elif gemini_key and genai is None:
-        print("Gemini API key is set, but 'google-generativeai' package is not installed. Falling back to rules.")
+        print("Gemini API key set but google-generativeai package not installed. Using rules.")
 
-    # 2. Rule-Based Fallback
+    # 2. Enhanced Rule-Based Fallback
     responses_en = {
-        "crop": "For crop recommendations, use the Farm Analyzer with your GPS location. It uses live weather and real soil data from SoilGrids.",
-        "fertilizer": "Fertilizer advice depends on your soil test results. Generally: use DAP at sowing, top-dress with Urea at tillering. Always check NPK deficiency first.",
-        "irrigation": "Irrigate based on soil moisture and weather. Drip irrigation saves 40-50% water vs flood. Water in early morning (6-8 AM) for best absorption.",
-        "disease": "Upload a leaf photo in the Crop Doctor section for AI disease detection. For potato: early blight treated with Mancozeb. Late blight is urgent — apply copper fungicide immediately.",
-        "weather": "Check the Weather section for a live 5-day forecast with farming advisories. Weather data is fetched by your GPS coordinates, not city name.",
-        "price": "Check the Market Prices section for mandi rates. For real-time prices, visit agmarknet.gov.in or contact your local mandi.",
-        "soil": "Soil data comes from SoilGrids (ISRIC) by your GPS coordinates. It is satellite-model estimated. For exact values, upload your soil lab test report.",
-        "help": "I can help with: crop recommendations, fertilizer advice, irrigation guidance, weather, disease, soil health, and market prices. Ask me anything!",
-        "default": "I'm the Agri-Connect AI assistant. I can help with crop, fertilizer, irrigation, disease, weather, and market price questions. What do you need help with?"
+        "crop": "For personalized crop recommendations, use the Farm Analyzer with your GPS location. It uses live weather and real soil data from SoilGrids. Common Kharif crops: Rice, Cotton, Maize, Soybean. Rabi: Wheat, Mustard, Chickpea. Choose based on your soil type, water availability, and local market demand.",
+        "fertilizer": "Fertilizer advice depends on soil test results. General guidelines: Apply DAP (50 kg/acre) at sowing for phosphorus. Top-dress with Urea (30-40 kg/acre) at 25 and 50 days. For potassium deficiency, use MOP (25 kg/acre). Always get a soil test from your nearest KVK for precise recommendations.",
+        "irrigation": "Irrigate based on soil moisture and crop stage. Drip irrigation saves 40-50% water vs flood irrigation. Water in early morning (6-8 AM) for best absorption. Rice needs standing water during tillering. Cotton needs critical irrigation at flowering and boll formation stages.",
+        "disease": "Upload a leaf photo in Crop Doctor for AI diagnosis. Common diseases: Leaf Blight (treat with Mancozeb 2.5g/L), Powdery Mildew (Sulfur 3g/L), Bacterial Wilt (remove infected plants, apply Streptocycline). Always rotate crops to prevent soil-borne diseases.",
+        "weather": "Check the Weather section for a live 5-day forecast with farming advisories. Plan spraying on dry days with low wind. Avoid irrigation before expected rainfall. Protect crops during frost with smoke screens or straw mulching.",
+        "price": "Check Market Prices section for live mandi rates from Agmarknet. For better prices: sell at regulated mandis, check prices at 3-4 mandis before selling, consider grading and packaging, and explore FPO collective selling for bargaining power.",
+        "soil": "Soil data comes from SoilGrids (ISRIC) by GPS coordinates. For precise values, get a lab test from your district KVK. Key parameters: pH (6.0-7.5 ideal), Nitrogen (N), Phosphorus (P), Potassium (K), Organic Carbon (>0.5%), and electrical conductivity.",
+        "scheme": "Key government schemes: PM-KISAN (₹6000/year), PM Fasal Bima Yojana (crop insurance), KCC (Kisan Credit Card at 4% interest), Soil Health Card scheme, and PM Krishi Sinchai Yojana for irrigation. Apply through your local agriculture office or CSC center.",
+        "help": "I can help with: crop recommendations, fertilizer advice, irrigation scheduling, disease diagnosis, weather forecasts, market prices, government schemes, soil health, animal husbandry, and general knowledge. Ask me anything!",
+        "default": "I'm AgriConnect AI — your intelligent farming assistant. I can help with crops, fertilizers, diseases, weather, market prices, government schemes, and much more. What would you like to know?"
     }
 
     msg_lower = message.lower()
     reply = None
-    if any(w in msg_lower for w in ["crop", "పంట", "recommend"]):
+    if any(w in msg_lower for w in ["crop", "పంట", "recommend", "grow", "sow", "plant", "cultivation"]):
         reply = responses_en["crop"]
-    elif any(w in msg_lower for w in ["fertilizer", "ఎరువు", "npk", "urea", "nutrient"]):
+    elif any(w in msg_lower for w in ["fertilizer", "ఎరువు", "npk", "urea", "nutrient", "manure", "dap"]):
         reply = responses_en["fertilizer"]
-    elif any(w in msg_lower for w in ["water", "irrigation", "irrigate", "నీరు", "నీటిపారుదల"]):
+    elif any(w in msg_lower for w in ["water", "irrigation", "irrigate", "నీరు", "నీటిపారుదల", "drip"]):
         reply = responses_en["irrigation"]
-    elif any(w in msg_lower for w in ["disease", "leaf", "blight", "pest", "వ్యాధి"]):
+    elif any(w in msg_lower for w in ["disease", "leaf", "blight", "pest", "వ్యాధి", "fungus", "insect", "worm"]):
         reply = responses_en["disease"]
-    elif any(w in msg_lower for w in ["weather", "rain", "forecast", "వాతావరణం"]):
+    elif any(w in msg_lower for w in ["weather", "rain", "forecast", "వాతావరణం", "climate", "monsoon"]):
         reply = responses_en["weather"]
-    elif any(w in msg_lower for w in ["price", "market", "mandi", "msp", "ధర"]):
+    elif any(w in msg_lower for w in ["price", "market", "mandi", "msp", "ధర", "sell", "rate"]):
         reply = responses_en["price"]
-    elif any(w in msg_lower for w in ["soil", "నేల", "ph", "nitrogen"]):
+    elif any(w in msg_lower for w in ["soil", "నేల", "ph", "nitrogen", "testing", "organic"]):
         reply = responses_en["soil"]
-    elif any(w in msg_lower for w in ["help", "సహాయం", "what", "how"]):
+    elif any(w in msg_lower for w in ["scheme", "yojana", "pm kisan", "government", "subsidy", "insurance", "loan"]):
+        reply = responses_en["scheme"]
+    elif any(w in msg_lower for w in ["help", "సహాయం", "what can", "how can"]):
         reply = responses_en["help"]
     else:
         reply = responses_en["default"]
 
     return jsonify({
         "reply": reply,
-        "language": "en",  # Always English raw text; frontend uses Google Translate directly!
+        "language": "en",
+        "source": "rule_fallback",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
 
