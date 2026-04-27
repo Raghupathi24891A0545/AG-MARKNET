@@ -1804,27 +1804,9 @@ body::before {
   background-clip: text;
 }
 
-.hero-word.hero-word-animate {
-  animation: heroWordJumbleIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
+/* hero-word-animate replaced by hero-jumble-word + hero-word-smash-in system */
+/* See HERO WORD JUMBLE section below for the new letter scramble animation */
 
-@keyframes heroWordJumbleIn {
-  0% {
-    opacity: 0;
-    transform: translateY(80px) translateX(calc(-30px + var(--word-i) * 15px)) rotate(calc(-12deg + var(--word-i) * 4deg)) scale(0.3);
-    filter: blur(12px);
-  }
-  50% {
-    opacity: 0.8;
-    transform: translateY(-10px) translateX(5px) rotate(2deg) scale(1.08);
-    filter: blur(1px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) translateX(0) rotate(0) scale(1);
-    filter: blur(0);
-  }
-}
 
 .hero-title .green {
   background: linear-gradient(135deg, var(--c-primary-light), #86efac);
@@ -2616,129 +2598,403 @@ input[type=number] { -moz-appearance: textfield; }
 }
 
 /* ============================================================
-   🎬 GRAND INTRO OVERLAY — Heroic Website Entry
+   🎬 CINEMATIC INTRO OVERLAY — Blockbuster Website Entry
    ============================================================ */
-.grand-intro-overlay {
+
+/* Screen shake effect on body */
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-6px, -3px); }
+  20% { transform: translate(5px, 4px); }
+  30% { transform: translate(-4px, 2px); }
+  40% { transform: translate(3px, -5px); }
+  50% { transform: translate(-2px, 3px); }
+  60% { transform: translate(4px, -2px); }
+  70% { transform: translate(-3px, 1px); }
+  80% { transform: translate(2px, -3px); }
+  90% { transform: translate(-1px, 2px); }
+}
+
+.cinema-screen-shake {
+  animation: screenShake 0.5s ease both !important;
+}
+
+.cinema-intro-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   z-index: 9999;
-  background: radial-gradient(ellipse at center, #0d1f14 0%, #050a07 100%);
+  background: #020804;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
 
-.grand-intro-overlay::before {
+/* Deep ambient glow */
+.cinema-intro-overlay::before {
   content: '';
   position: absolute;
   top: 50%; left: 50%;
-  width: 600px; height: 600px;
+  width: 900px; height: 900px;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(22,163,74,0.15) 0%, transparent 70%);
-  animation: introPulseGlow 2s ease-in-out infinite;
+  background: radial-gradient(circle,
+    rgba(22,163,74,0.12) 0%,
+    rgba(22,163,74,0.06) 30%,
+    rgba(34,197,94,0.02) 50%,
+    transparent 70%
+  );
+  animation: cinemaAmbientPulse 3s ease-in-out infinite;
 }
 
-@keyframes introPulseGlow {
-  0%, 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.4; }
-  50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
-}
-
-.intro-particles {
+.cinema-intro-overlay::after {
+  content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
   pointer-events: none;
+  z-index: 1;
 }
 
-.intro-spark {
+@keyframes cinemaAmbientPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.7); opacity: 0.3; }
+  50% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
+}
+
+/* Particle Canvas */
+#cinema-particles-canvas {
   position: absolute;
-  animation: sparkFloat 2s ease-in-out infinite;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   pointer-events: none;
-}
-
-@keyframes sparkFloat {
-  0% { opacity: 0; transform: scale(0) translateY(0); }
-  30% { opacity: 1; transform: scale(1.2) translateY(-10px); }
-  70% { opacity: 0.8; transform: scale(0.8) translateY(-30px); }
-  100% { opacity: 0; transform: scale(0) translateY(-50px); }
-}
-
-.intro-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  position: relative;
   z-index: 2;
 }
 
-.intro-icon-burst {
-  font-size: 5rem;
-  animation: introIconBurst 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
-  filter: drop-shadow(0 0 40px rgba(22,163,74,0.6));
+/* Shockwave Rings */
+.cinema-shockwave-container {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
 }
 
-@keyframes introIconBurst {
+.cinema-shockwave {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(34,197,94,0.6);
+  transform: translate(-50%, -50%) scale(0);
+  animation: shockwaveExpand 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.cinema-shockwave.ring2 {
+  animation-delay: 0.4s;
+  border-color: rgba(134,239,172,0.4);
+}
+
+.cinema-shockwave.ring3 {
+  animation-delay: 0.8s;
+  border-color: rgba(22,163,74,0.25);
+}
+
+@keyframes shockwaveExpand {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 4px; }
+  60% { opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(80); opacity: 0; border-width: 1px; }
+}
+
+/* Lightning Flash */
+.cinema-lightning {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.05s ease;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.3) 0%, rgba(200,255,200,0.1) 40%, transparent 70%);
+}
+
+.cinema-lightning.cinema-flash-active {
+  opacity: 1;
+}
+
+/* Intro Content Container */
+.cinema-intro-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  position: relative;
+  z-index: 5;
+}
+
+/* Emblem — Central Icon with Rotating Rings */
+.cinema-emblem {
+  position: relative;
+  width: 140px; height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: emblemEnter 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+
+@keyframes emblemEnter {
   0% { opacity: 0; transform: scale(0) rotate(-180deg); }
-  60% { transform: scale(1.3) rotate(10deg); }
+  60% { transform: scale(1.2) rotate(15deg); }
+  80% { transform: scale(0.95) rotate(-5deg); }
   100% { opacity: 1; transform: scale(1) rotate(0); }
 }
 
-.intro-title-container {
+.cinema-emblem-icon {
+  font-size: 4.5rem;
+  filter: drop-shadow(0 0 50px rgba(22,163,74,0.8)) drop-shadow(0 0 100px rgba(34,197,94,0.4));
+  animation: emblemFloat 3s ease-in-out infinite;
+  z-index: 2;
+}
+
+@keyframes emblemFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.cinema-emblem-ring {
+  position: absolute;
+  width: 130px; height: 130px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(34,197,94,0.6);
+  border-right-color: rgba(134,239,172,0.3);
+  animation: ringRotate 3s linear infinite;
+}
+
+.cinema-emblem-ring-2 {
+  width: 110px; height: 110px;
+  border-top-color: rgba(245,158,11,0.4);
+  border-left-color: rgba(34,197,94,0.3);
+  animation-direction: reverse;
+  animation-duration: 2.5s;
+}
+
+@keyframes ringRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Scramble Title Stage */
+.cinema-title-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  perspective: 1000px;
+}
+
+.cinema-scramble-line {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 2px;
+  min-height: 80px;
 }
 
-.intro-letter {
+/* Individual scramble character */
+.cinema-scramble-char {
+  display: inline-block;
   font-family: var(--font-display);
-  font-size: clamp(3rem, 8vw, 5.5rem);
+  font-size: clamp(3rem, 9vw, 6rem);
   font-weight: 900;
-  color: #f0fdf4;
-  letter-spacing: -2px;
-  opacity: 0;
-  animation: introLetterPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  animation-delay: calc(0.5s + var(--i) * 0.07s);
-  text-shadow: 0 0 40px rgba(255,255,255,0.1);
+  color: rgba(240,253,244,0.15);
+  letter-spacing: -1px;
+  transition: color 0.15s ease, transform 0.2s ease, text-shadow 0.2s ease;
+  will-change: transform, color;
 }
 
-.intro-letter.intro-green {
+.cinema-scramble-char.cinema-char-active {
+  color: rgba(240,253,244,0.5);
+  animation: charJitter 0.1s ease infinite;
+}
+
+@keyframes charJitter {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(-1deg); }
+  75% { transform: translateY(1px) rotate(1deg); }
+}
+
+.cinema-scramble-char.cinema-char-locked {
+  color: #f0fdf4;
+  animation: none;
+  text-shadow: 0 0 30px rgba(255,255,255,0.3), 0 0 60px rgba(22,163,74,0.2);
+}
+
+.cinema-scramble-char.cinema-char-slam {
+  animation: charSlam 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes charSlam {
+  0% { transform: scale(2.5) rotate(-10deg); opacity: 0; filter: blur(8px); }
+  50% { transform: scale(0.8) rotate(3deg); opacity: 1; filter: blur(0); }
+  70% { transform: scale(1.15) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* Green word variant */
+.cinema-green-word .cinema-scramble-char.cinema-char-locked {
+  background: linear-gradient(135deg, var(--c-primary-light), #86efac, #4ade80);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 25px rgba(34,197,94,0.5));
+}
+
+/* Tagline Words */
+.cinema-tagline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 30px;
+}
+
+.cinema-tagline-word {
+  font-family: var(--font-display);
+  font-size: clamp(0.9rem, 2.5vw, 1.4rem);
+  font-weight: 600;
+  color: var(--c-text-secondary);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(20px) scale(0.8);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cinema-tagline-word.cinema-tagline-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.cinema-tagline-emoji {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Enter Hint */
+.cinema-enter-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(167,243,208,0.4);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.8s ease;
+  margin-top: 20px;
+}
+
+.cinema-enter-hint.cinema-enter-visible {
+  opacity: 1;
+  transform: translateY(0);
+  animation: hintPulse 2s ease infinite;
+}
+
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.cinema-enter-pulse {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--c-primary-light);
+  animation: enterPulseDot 1.5s ease infinite;
+}
+
+@keyframes enterPulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+  50% { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
+}
+
+/* Exit Animation */
+.cinema-intro-overlay.cinema-intro-exit {
+  animation: cinemaOverlayExit 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes cinemaOverlayExit {
+  0% { opacity: 1; transform: scale(1); filter: brightness(1); }
+  30% { filter: brightness(2); transform: scale(1.02); }
+  60% { opacity: 0.6; filter: brightness(1.5); transform: scale(1.08); }
+  100% { opacity: 0; transform: scale(1.6); filter: brightness(3); pointer-events: none; }
+}
+
+/* ============================================================
+   🔤 HERO WORD JUMBLE / SCRAMBLE — Letters smash into place
+   ============================================================ */
+
+.hero-letter-cell {
+  display: inline-block;
+  will-change: transform, color;
+  transition: color 0.1s ease;
+  color: rgba(240,253,244,0.3);
+}
+
+.hero-letter-cell.hero-letter-locked {
+  color: inherit;
+}
+
+.hero-letter-cell.hero-letter-slam {
+  animation: heroLetterSlam 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes heroLetterSlam {
+  0% { transform: scale(2) translateY(-20px) rotate(-8deg); opacity: 0.4; filter: blur(4px); text-shadow: 0 0 40px rgba(34,197,94,0.8); }
+  50% { transform: scale(0.85) translateY(3px) rotate(2deg); opacity: 1; filter: blur(0); }
+  70% { transform: scale(1.1) translateY(-2px) rotate(-1deg); }
+  100% { transform: scale(1) translateY(0) rotate(0); text-shadow: none; }
+}
+
+.hero-word-smash-in {
+  animation: heroWordSmashIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes heroWordSmashIn {
+  0% { opacity: 0; transform: translateY(60px) scale(0.5); filter: blur(8px); }
+  40% { opacity: 1; filter: blur(0); }
+  100% { transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* Green letters in hero */
+.hero-word.green .hero-letter-cell.hero-letter-locked {
   background: linear-gradient(135deg, var(--c-primary-light), #86efac);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 20px rgba(34,197,94,0.4));
 }
 
-@keyframes introLetterPop {
-  0% { opacity: 0; transform: translateY(60px) scale(0.3) rotate(-15deg); filter: blur(10px); }
-  70% { transform: translateY(-8px) scale(1.1) rotate(2deg); filter: blur(0); }
-  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); filter: blur(0); }
-}
-
-.intro-tagline {
-  font-size: clamp(0.9rem, 2.5vw, 1.3rem);
-  color: var(--c-text-secondary);
-  font-weight: 500;
-  letter-spacing: 2px;
-  opacity: 0;
-  animation: introTaglineFade 0.8s ease 1.8s both;
-}
-
-@keyframes introTaglineFade {
-  0% { opacity: 0; transform: translateY(20px); letter-spacing: 8px; }
-  100% { opacity: 1; transform: translateY(0); letter-spacing: 2px; }
-}
-
-.grand-intro-overlay.intro-exit {
-  animation: introOverlayExit 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes introOverlayExit {
-  0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
-  100% { opacity: 0; transform: scale(1.5); pointer-events: none; }
+@media (max-width: 600px) {
+  .cinema-scramble-char {
+    font-size: clamp(2rem, 12vw, 3.5rem);
+  }
+  .cinema-title-stage {
+    gap: 8px;
+  }
+  .cinema-emblem {
+    width: 100px; height: 100px;
+  }
+  .cinema-emblem-icon {
+    font-size: 3rem;
+  }
+  .cinema-emblem-ring {
+    width: 95px; height: 95px;
+  }
+  .cinema-emblem-ring-2 {
+    width: 80px; height: 80px;
+  }
 }
 
 /* ============================================================
