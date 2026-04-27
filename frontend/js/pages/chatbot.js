@@ -4,32 +4,11 @@
 // streaming-style typing, and comprehensive answers.
 // ============================================================
 
-import { translateDynamicText } from '../api.js';
+import { sendChatMessage, translateDynamicText } from '../api.js';
 import { showToast } from '../voice.js';
 
-// Gemini API Key — direct client-side call (no backend needed)
-const GEMINI_API_KEY = 'AIzaSyAWXjkiEuQif_W1ngEYxafYsbe4qqdRffQ';
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
 let chatHistory = [];
-let conversationContext = []; // Gemini-format conversation history
 let currentLang = 'en';
-
-const SYSTEM_PROMPT = `You are AgriConnect AI — a world-class intelligent assistant built for Indian farmers, agricultural professionals, and rural communities. You have deep expertise in agriculture, farming, animal husbandry, horticulture, fisheries, sericulture, government schemes, rural finance, weather, soil science, crop management, pest control, market intelligence, and all topics relevant to a farmer's life.
-
-IMPORTANT RULES:
-1. You are NOT limited to agriculture only. You can answer ANY question — general knowledge, science, math, health, education, technology, government services, banking, insurance, legal rights, etc. — just like Google's Gemini AI or ChatGPT.
-2. When the question is farming/agriculture related, give expert-level, detailed, actionable advice with specific quantities, timings, product names, and scientific backing.
-3. When the question is general (non-farming), answer it accurately and helpfully like any advanced AI assistant would.
-4. Always be conversational, warm, and respectful. Address the user as a valued farmer friend.
-5. Use clear formatting: bullet points, numbered lists, bold for key terms. Keep answers comprehensive but well-structured.
-6. For crop/fertilizer/pesticide questions, include specific dosages (kg/acre), brand names common in India, application timing, and cost estimates when relevant.
-7. For government scheme questions, provide scheme names, eligibility criteria, application process, and relevant links.
-8. For weather/season questions, consider Indian agricultural seasons (Kharif, Rabi, Zaid).
-9. You can do math, conversions (acres to hectares, quintals to tonnes), and calculations.
-10. If you don't know something, say so honestly rather than making up information.
-11. NEVER refuse to answer a question. You are a helpful, all-knowing assistant.
-12. Give detailed, comprehensive answers — not short 2-3 sentence replies. Explain things thoroughly like a knowledgeable friend would.`;
 
 const BOT_GREETINGS = {
   en: "🌾 **Namaste! I'm AgriConnect AI** — your intelligent farming companion.\n\nI can help you with:\n• 🌱 Crop recommendations & management\n• 💊 Disease diagnosis & treatment\n• 🧪 Fertilizer & soil advice\n• 💰 Market prices & government schemes\n• 🌤️ Weather-based farming tips\n• 📚 **Any question** — I work just like ChatGPT!\n\nAsk me anything in **English** or **Telugu**. I'm here to help! 🚀",
@@ -101,7 +80,6 @@ function renderMarkdown(text) {
 export function renderChatbot() {
   const greet = BOT_GREETINGS[currentLang];
   chatHistory = [{ role: 'bot', text: greet }];
-  conversationContext = [];
 
   return `
     <div class="page-section chatbot-page">
@@ -212,7 +190,6 @@ export function initChatbot() {
 
   // Clear chat
   clearBtn?.addEventListener('click', () => {
-    conversationContext = [];
     chatHistory = [];
     window.dispatchEvent(new CustomEvent('navigate', { detail: 'chatbot' }));
   });
@@ -251,10 +228,10 @@ async function sendMessage() {
   const typingId = appendTyping();
 
   try {
-    const reply = await callGeminiAPI(msg);
+    const result = await sendChatMessage(msg, currentLang);
     removeTyping(typingId);
 
-    let responseText = reply || 'Sorry, I could not process that. Please try again.';
+    let responseText = result.reply || 'Sorry, I could not process that. Please try again.';
 
     // Translate if Telugu selected
     if (currentLang !== 'en') {
@@ -268,83 +245,12 @@ async function sendMessage() {
     appendMessage('bot', responseText);
   } catch (err) {
     removeTyping(typingId);
-    console.error('Gemini API Error:', err);
-    let errMsg = `⚠️ **Connection Error**\n\n${err.message}\n\nPlease check your internet connection and try again.`;
+    console.error('API Error:', err);
+    let errMsg = \`⚠️ **Connection Error**\n\n\${err.message}\n\nPlease check your internet connection and try again.\`;
     if (currentLang !== 'en') {
       try { errMsg = await translateDynamicText(errMsg, currentLang); } catch (e) {}
     }
     appendMessage('bot', errMsg);
-  }
-}
-
-/* ── Gemini API Direct Call ────────────────────────── */
-async function callGeminiAPI(userMessage) {
-  // Build conversation with system context
-  const contents = [];
-
-  // Add system prompt as the first user message (Gemini doesn't have a "system" role in REST)
-  contents.push({
-    role: 'user',
-    parts: [{ text: SYSTEM_PROMPT + '\n\nPlease acknowledge and begin.' }]
-  });
-  contents.push({
-    role: 'model',
-    parts: [{ text: 'Understood! I am AgriConnect AI, ready to help with any question — farming, government schemes, general knowledge, or anything else. How can I assist you today?' }]
-  });
-
-  // Add conversation history (last 20 messages for context window)
-  const recentContext = conversationContext.slice(-20);
-  for (const turn of recentContext) {
-    contents.push(turn);
-  }
-
-  // Add current message
-  contents.push({
-    role: 'user',
-    parts: [{ text: userMessage }]
-  });
-
-  const requestBody = {
-    contents: contents,
-    generationConfig: {
-      temperature: 0.8,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: 4096,
-    },
-    safetySettings: [
-      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-    ]
-  };
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
-
-  const response = await fetch(GEMINI_API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(requestBody),
-    signal: controller.signal,
-  });
-
-  clearTimeout(timeout);
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData?.error?.message || `API Error (${response.status})`);
-  }
-
-  const data = await response.json();
-  const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response received.';
-
-  // Update conversation context
-  conversationContext.push({ role: 'user', parts: [{ text: userMessage }] });
-  conversationContext.push({ role: 'model', parts: [{ text: replyText }] });
-
-  return replyText;
 }
 
 /* ── Append Message to Chat ───────────────────────── */
