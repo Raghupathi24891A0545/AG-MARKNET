@@ -3,6 +3,7 @@
 // ============================================================
 
 import { t } from '../i18n.js';
+import { renderIntroVideo, initIntroVideo } from '../components/introVideo.js';
 
 let hasPlayedIntro = false;
 
@@ -135,6 +136,8 @@ export function renderHome() {
           <div class="feature-card-desc">Talk to certified agronomists and plant pathologists directly via call or WhatsApp.</div>
         </div>
       </div>
+
+      ${renderIntroVideo()}
     </div>
   `;
 }
@@ -177,6 +180,9 @@ export function initHome() {
 
   // Trigger hero word jumble after intro
   triggerHeroJumble(introDelay);
+
+  // Initialize intro video player
+  setTimeout(() => initIntroVideo(), introDelay + 500);
 }
 
 // ============================================
