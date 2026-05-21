@@ -398,7 +398,7 @@ def _try_live_api(commodity_lower, state, district, limit):
                     resp = requests.get(
                         base_url,
                         params=params,
-                        timeout=20,
+                        timeout=2,
                         headers={"Accept": "application/json"}
                     )
 
@@ -421,7 +421,7 @@ def _try_live_api(commodity_lower, state, district, limit):
                                 del params2["filters[state]"]
                             params2["filters[state.keyword]"] = state
                             try:
-                                resp2 = requests.get(base_url, params=params2, timeout=15,
+                                resp2 = requests.get(base_url, params=params2, timeout=2,
                                                      headers={"Accept": "application/json"})
                                 if resp2.status_code == 200:
                                     data2 = resp2.json()

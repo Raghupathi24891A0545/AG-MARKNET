@@ -147,7 +147,7 @@ const strings = {
 
     // Crop Doctor
     doctor_title: '🔬 Crop Disease Detection',
-    doctor_desc: 'Upload a leaf photo for AI-powered disease identification and treatment advice',
+    doctor_desc: 'Upload a leaf photo for instant disease identification and treatment advice',
     upload_image: 'Upload Leaf Image',
     detect: '🔬 Detect Disease',
 
@@ -197,7 +197,7 @@ const strings = {
     feature_fert: 'ఎరువుల గైడ్',
     feature_fert_desc: 'దశల వారీగా అమలు ప్రణాళిక, పోషక లోపం సారాంశం, సేంద్రీయ ప్రత్యామ్నాయాలు.',
     feature_doctor: 'పంట వైద్యుడు',
-    feature_doctor_desc: 'AI వ్యాధి నిర్ధారణ కోసం ఆకు ఫోటో అప్‌లోడ్ చేయండి.',
+    feature_doctor_desc: 'వ్యాధి నిర్ధారణ కోసం ఆకు ఫోటో అప్‌లోడ్ చేయండి.',
     feature_market: 'మార్కెట్ ధరలు',
     feature_market_desc: 'పంట మరియు స్థానం ద్వారా మండి ధరల శోధన.',
     feature_chatbot: 'పొలం సహాయకుడు',
@@ -208,7 +208,7 @@ const strings = {
 
     // Analyzer
     analyzer_title: '🌱 పొలం బుద్ధిమత్తా విశ్లేషకుడు',
-    analyzer_desc: 'ప్రత్యక్ష GPS, నిజమైన నేల డేటా మరియు ప్రత్యక్ష వాతావరణాన్ని ఉపయోగించి AI-ఆధారిత పంట మరియు ఎరువుల సిఫారసులు',
+    analyzer_desc: 'ప్రత్యక్ష GPS, నిజమైన నేల డేటా మరియు ప్రత్యక్ష వాతావరణాన్ని ఉపయోగించి పంట మరియు ఎరువుల సిఫారసులు',
     step_location: 'స్థానం',
     step_farm: 'పొలం వివరాలు',
     step_soil: 'నేల',
@@ -299,7 +299,7 @@ const strings = {
 
     // Crop Doctor
     doctor_title: '🔬 పంట వ్యాధి నిర్ధారణ',
-    doctor_desc: 'AI-ఆధారిత వ్యాధి గుర్తింపు మరియు చికిత్స సలహా కోసం ఆకు ఫోటో అప్‌లోడ్ చేయండి',
+    doctor_desc: 'వ్యాధి గుర్తింపు మరియు చికిత్స సలహా కోసం ఆకు ఫోటో అప్‌లోడ్ చేయండి',
     upload_image: 'ఆకు చిత్రాన్ని అప్‌లోడ్ చేయండి',
     detect: '🔬 వ్యాధిని కనుగొని',
 

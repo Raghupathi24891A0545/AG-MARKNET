@@ -28,7 +28,7 @@ export function renderFooter() {
         <div class="footer-col">
           <div class="footer-heading">🌾 ${lang === 'te' ? 'మరిన్ని' : 'More'}</div>
           <ul class="footer-list">
-            <li><a href="#" data-navigate="chatbot" class="footer-link">💬 ${lang === 'te' ? 'AI సహాయకుడు' : 'AI Assistant'}</a></li>
+            <li><a href="#" data-navigate="chatbot" class="footer-link">💬 ${lang === 'te' ? 'స్మార్ట్ సహాయకుడు' : 'Smart Assistant'}</a></li>
             <li><a href="#" data-navigate="alerts" class="footer-link">🚨 ${lang === 'te' ? 'హెచ్చరికలు' : 'Farm Alerts'}</a></li>
             <li><span class="footer-text">📞 ${lang === 'te' ? 'కిసాన్ హెల్ప్‌లైన్' : 'Kisan Helpline'}: 1800-180-1551</span></li>
             <li><span class="footer-text">🌐 ${lang === 'te' ? 'ఇంగ్లీష్ & తెలుగు' : 'English & Telugu'}</span></li>
@@ -41,7 +41,7 @@ export function renderFooter() {
           <ul class="footer-list">
             <li><span class="footer-text">${lang === 'te' ? 'భారతీయ రైతుల కోసం తయారు చేయబడింది' : 'Made for Indian Farmers'}</span></li>
             <li><span class="footer-text">${lang === 'te' ? 'GPS-ఆధారిత విశ్లేషణ' : 'GPS-based Analysis'}</span></li>
-            <li><span class="footer-text">${lang === 'te' ? 'పంట & ఎరువుల AI సిఫారసులు' : 'Crop & Fertilizer AI Advice'}</span></li>
+            <li><span class="footer-text">${lang === 'te' ? 'పంట & ఎరువుల సిఫారసులు' : 'Crop & Fertilizer Recommendations'}</span></li>
             <li><span class="footer-text">${lang === 'te' ? '3000+ మండి మార్కెట్ ధరలు' : '3000+ Mandi Market Prices'}</span></li>
           </ul>
         </div>
